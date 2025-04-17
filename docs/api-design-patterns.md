@@ -33,7 +33,7 @@ The SDK uses a base endpoint class with template methods:
 ```typescript
 // BaseEndpoint class provides consistent request handling
 class BaseEndpoint {
-  constructor(protected client: CoCartClient) {}
+  constructor(protected cocart: CoCart) {}
 
   // Template method for all API requests
   protected async makeRequest<T>(
@@ -42,18 +42,18 @@ class BaseEndpoint {
   ): Promise<T> {
     try {
       // Pre-request processing
-      this.client.emit('beforeRequest', endpoint, options);
+      this.cocart.emit('beforeRequest', endpoint, options);
       
       // Make the actual request
-      const response = await this.client.request<T>(endpoint, options);
+      const response = await this.cocart.request<T>(endpoint, options);
       
       // Post-request processing
-      this.client.emit('afterRequest', endpoint, response);
+      this.cocart.emit('afterRequest', endpoint, response);
       
       return response;
     } catch (error) {
       // Standardized error handling
-      this.client.emit('requestError', endpoint, error);
+      this.cocart.emit('requestError', endpoint, error);
       
       if (error instanceof APIError) {
         throw error;

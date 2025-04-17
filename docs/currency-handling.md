@@ -1,5 +1,5 @@
 **Navigation:**
-- [Documentation Index](./README.md)
+- [Documentation Index](./index.md)
 - [Back to README](../README.md)
 - [Architecture Overview](./architecture.md)
 - [API Design Patterns](./api-design-patterns.md)
@@ -58,20 +58,30 @@ This approach provides all the information needed to correctly format currency v
 
 ## Configuration
 
-Enabling currency formatting is extremely simple - just set the `currencyFormat` property to `true` when creating the client:
+The CoCart SDK provides built-in support for currency formatting. You can configure currency handling when initializing the SDK:
 
-```javascript
-// Enable automatic currency formatting
-const client = new CoCartClient({
+```typescript
+import { CoCart } from '@cocart/sdk';
+
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
-  currencyFormat: true
+  currencyConfig: {
+    // Currency formatting options
+    format: {
+      // Symbol position: 'left', 'right', 'left_space', 'right_space'
+      symbolPosition: 'left',
+      // Thousand separator: typically ',' or '.'
+      thousandSeparator: ',',
+      // Decimal separator: typically '.' or ','
+      decimalSeparator: '.',
+      // Number of decimal places, default is 2
+      decimalPrecision: 2,
+      // Format string with placeholders: %v = value, %s = symbol
+      formatString: '%s%v'
+    }
+  }
 });
 ```
-
-That's it! With this single setting, the SDK will automatically:
-- Convert integer values to formatted strings in all API responses
-- Preserve original integer values for calculations
-- Use the currency information from the API for proper formatting
 
 ## Automatic Formatting
 
@@ -79,7 +89,7 @@ When `currencyFormat: true` is set, all API responses will have their currency v
 
 ```javascript
 // With automatic formatting enabled
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 
 // API returned 4599, but SDK formatted it to "$45.99"
 console.log(cart.totals.total); // "$45.99"
@@ -95,18 +105,18 @@ This applies to all nested objects and arrays in the response, ensuring consiste
 Even if automatic formatting is not enabled, you can still use the formatter manually:
 
 ```javascript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
   // currencyFormat not specified (or set to false)
 });
 
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 
 // API returns integer values
 console.log(cart.totals.total); // 4599
 
 // Format manually when needed
-const formattedTotal = client.currencyFormatter.format(
+const formattedTotal = cocart.currencyFormatter.format(
   cart.totals.total, 
   cart.currency
 );
@@ -125,7 +135,7 @@ Both methods require the currency information from the API response.
 When automatic formatting is enabled, original integer values are always preserved in properties with the `_original_` prefix:
 
 ```javascript
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 
 // Formatted for display
 console.log(cart.totals.total); // "$45.99"
@@ -137,7 +147,7 @@ console.log(cart._original_items[0].price); // 1999
 
 // Calculate a discount
 const discount = cart._original_totals.total * 0.1; // 459.9
-const formattedDiscount = client.currencyFormatter.format(
+const formattedDiscount = cocart.currencyFormatter.format(
   discount, 
   cart.currency
 ); // "$4.60"

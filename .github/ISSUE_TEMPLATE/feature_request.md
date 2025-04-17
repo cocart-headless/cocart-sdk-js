@@ -18,9 +18,9 @@ A clear and concise description of any alternative solutions or features you've 
 **Potential API Design**
 ```typescript
 // If you have ideas about how the API for this feature should look, please share:
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 

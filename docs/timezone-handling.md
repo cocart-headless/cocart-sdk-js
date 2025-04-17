@@ -35,10 +35,10 @@ The CoCart SDK provides built-in support for automatic timezone conversion, whic
 Enable timezone conversion when initializing the CoCart client:
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Enable automatic timezone conversion using the browser's timezone
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: true
 });
@@ -49,7 +49,7 @@ const client = new CoCartClient({
 For more control, you can specify additional options:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: {
     enabled: true,
@@ -83,14 +83,14 @@ Once conversion is enabled, date fields in the API response will automatically b
 
 ```typescript
 // Get an order
-const order = await client.request('orders/123');
+const order = await cocart.request('orders/123');
 
 // Date is already converted to local timezone
 console.log(`Order created: ${order.date_created}`);
 console.log(`Last modified: ${order.date_modified}`);
 
 // For carts with items that have date properties
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 cart.items.forEach(item => {
   if (item.date_added) {
     console.log(`${item.name} added on: ${item.date_added}`);
@@ -103,7 +103,7 @@ cart.items.forEach(item => {
 If you need access to both the original and converted dates, you can configure the SDK to preserve original values:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: {
     enabled: true,
@@ -111,7 +111,7 @@ const client = new CoCartClient({
   }
 });
 
-const order = await client.request('orders/123');
+const order = await cocart.request('orders/123');
 
 // Access converted date
 console.log(`Local time: ${order.date_created}`);
@@ -169,13 +169,13 @@ Display a user's order history with dates in their local timezone:
 
 ```typescript
 // Enable timezone conversion
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: true
 });
 
 async function displayOrderHistory() {
-  const orders = await client.request('orders');
+  const orders = await cocart.request('orders');
   
   orders.forEach(order => {
     // These dates are already converted to the user's timezone
@@ -206,7 +206,7 @@ interface SubscriptionProduct {
 }
 
 // Enable timezone conversion with date field customization
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: {
     enabled: true,
@@ -220,7 +220,7 @@ const client = new CoCartClient({
 });
 
 async function displaySubscriptions() {
-  const subscriptions = await client.request('subscriptions');
+  const subscriptions = await cocart.request('subscriptions');
   
   subscriptions.forEach((sub: SubscriptionProduct) => {
     console.log(`Subscription: ${sub.name}`);
@@ -244,7 +244,7 @@ async function displaySubscriptions() {
 Apply custom formatting to converted dates:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   timezoneConversion: {
     enabled: true,
@@ -272,7 +272,7 @@ const client = new CoCartClient({
 });
 
 // Date will be formatted like: "October 15, 2023 at 02:30 PM (PDT)"
-const order = await client.request('orders/123');
+const order = await cocart.request('orders/123');
 console.log(`Order date: ${order.date_created}`);
 ```
 

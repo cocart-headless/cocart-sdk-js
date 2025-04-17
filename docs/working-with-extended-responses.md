@@ -53,7 +53,7 @@ This means **any additional fields returned by the server will be preserved** in
 You can access these extended fields directly:
 
 ```typescript
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 
 cart.items.forEach(item => {
   // This works for any field returned by the API, even if not in the interface
@@ -78,7 +78,7 @@ interface ExtendedCartItem extends CartItem {
 }
 
 // Then use a type assertion when working with the response
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 const extendedItems = cart.items as ExtendedCartItem[];
 
 // Now you have proper type checking and autocomplete
@@ -113,7 +113,7 @@ const customItems = cart.items as CustomCartItem[];
 For more complex transformations, you can use a response transformer when creating the client:
 
 ```typescript
-import { CoCartClient, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, ResponseTransformer } from '@cocart/sdk';
 
 // Define a transformer that adds computed fields
 const responseTransformer: ResponseTransformer = (response) => {
@@ -133,13 +133,13 @@ const responseTransformer: ResponseTransformer = (response) => {
 };
 
 // Create client with the transformer
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   responseTransformer,
 });
 
 // Now all responses will include your computed fields
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 console.log(cart.items[0].total_quantity_price); // Computed field is available
 ```
 
@@ -161,7 +161,7 @@ interface AttributeExtendedCartItem extends CartItem {
 
 // Get cart and work with the extended items
 async function displayProductAttributes() {
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   const items = cart.items as AttributeExtendedCartItem[];
   
   items.forEach(item => {
@@ -229,7 +229,7 @@ interface CustomFieldCartItem extends CartItem {
 
 // Process cart items with custom fields
 function processCustomFields() {
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   cart.items.forEach(item => {
     // Check if the item has custom fields

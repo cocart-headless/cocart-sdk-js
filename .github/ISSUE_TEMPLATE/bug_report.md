@@ -22,9 +22,9 @@ A clear and concise description of what you expected to happen.
 **Code Example**
 ```typescript
 // Please provide a minimal code example that demonstrates the issue
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 

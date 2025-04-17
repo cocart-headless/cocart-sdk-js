@@ -47,7 +47,7 @@ Properties:
 
 ```typescript
 try {
-  await client.cart.addItem(123);
+  await cocart.cart.addItem(123);
 } catch (error) {
   if (error instanceof APIError) {
     console.error(`API Error ${error.status}: ${error.code} - ${error.message}`);
@@ -65,7 +65,7 @@ Properties:
 
 ```typescript
 try {
-  await client.cart.getCart();
+  await cocart.cart.getCart();
 } catch (error) {
   if (error instanceof NetworkError) {
     console.error('Network error:', error.message);
@@ -86,7 +86,7 @@ Properties:
 
 ```typescript
 try {
-  await client.cart.updateItem('invalid-key', { quantity: -1 });
+  await cocart.cart.updateItem('invalid-key', { quantity: -1 });
 } catch (error) {
   if (error instanceof ValidationError) {
     console.error('Validation error:', error.message);
@@ -104,7 +104,7 @@ Thrown when authentication fails (invalid credentials, expired token, etc.).
 
 ```typescript
 try {
-  await client.cart.getCart();
+  await cocart.cart.getCart();
 } catch (error) {
   if (error instanceof AuthenticationError) {
     console.error('Authentication error:', error.message);
@@ -122,7 +122,7 @@ Properties:
 
 ```typescript
 try {
-  await client.cart.getCart();
+  await cocart.cart.getCart();
 } catch (error) {
   if (error instanceof TimeoutError) {
     console.error(`Request timed out after ${error.timeoutMs}ms`);
@@ -138,7 +138,7 @@ The recommended pattern for handling errors is to use try/catch blocks around SD
 
 ```typescript
 try {
-  const cart = await client.cart.getCart();
+  const cart = await cocart.cart.getCart();
   // Handle successful response
 } catch (error) {
   // Handle error
@@ -152,7 +152,7 @@ With TypeScript, you can use type narrowing to handle different error types:
 
 ```typescript
 try {
-  await client.cart.addItem(123, { quantity: 2 });
+  await cocart.cart.addItem(123, { quantity: 2 });
 } catch (error) {
   if (error instanceof AuthenticationError) {
     // Handle authentication error
@@ -174,7 +174,7 @@ try {
 The SDK emits events when errors occur, allowing you to centralize error handling:
 
 ```typescript
-client.on('requestError', (endpoint, error) => {
+cocart.on('requestError', (endpoint, error) => {
   console.error(`Error in ${endpoint}:`, error);
   
   // Global error reporting
@@ -211,14 +211,14 @@ client.on('requestError', (endpoint, error) => {
    ```typescript
    // ❌ Too generic
    try {
-     await client.cart.addItem(123);
+     await cocart.cart.addItem(123);
    } catch (error) {
      console.error('Error:', error);
    }
 
    // ✅ Specific error handling
    try {
-     await client.cart.addItem(123);
+     await cocart.cart.addItem(123);
    } catch (error) {
      if (error instanceof APIError && error.code === 'out_of_stock') {
        showNotification('This product is currently out of stock');
@@ -263,7 +263,7 @@ client.on('requestError', (endpoint, error) => {
    Register event handlers for centralized error logging and monitoring.
 
    ```typescript
-   client.on('requestError', (endpoint, error) => {
+   cocart.on('requestError', (endpoint, error) => {
      // Log to monitoring service with context
      logger.error({
        message: error.message,

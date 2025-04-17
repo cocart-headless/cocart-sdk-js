@@ -24,7 +24,7 @@ describe('DefaultHttpClient', () => {
     };
     mockFetch.mockResolvedValue(mockResponse);
 
-    const response = await client.request('https://example.com/api', {
+    const response = await cocart.request('https://example.com/api', {
       method: 'GET',
       headers: { 'Custom-Header': 'value' },
     });

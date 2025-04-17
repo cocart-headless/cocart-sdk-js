@@ -9,6 +9,7 @@
 
 import { HttpClient, HttpRequestOptions } from '../types';
 import { CoCartError, NetworkError, ValidationError } from '../http/errors';
+import { CoCart } from '../cocart';
 
 export type RequestOptions = Omit<HttpRequestOptions, 'method' | 'body'>;
 

@@ -40,7 +40,7 @@ Response transformers allow you to modify the data returned from API calls befor
 ### Basic Response Transformer
 
 ```typescript
-import { CoCartClient, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, ResponseTransformer } from '@cocart/sdk';
 
 // Create a response transformer
 const myTransformer: ResponseTransformer = (endpoint, response) => {
@@ -66,13 +66,13 @@ const myTransformer: ResponseTransformer = (endpoint, response) => {
 };
 
 // Initialize client with the transformer
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   responseTransformer: myTransformer
 });
 
 // Use the client normally - responses will be transformed
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 console.log(`Items with quantities: ${cart.item_count_with_quantities}`);
 console.log(`Total: ${cart.formatted_totals.total}`);
 ```
@@ -80,7 +80,7 @@ console.log(`Total: ${cart.formatted_totals.total}`);
 ### Type-Safe Response Transformers
 
 ```typescript
-import { CoCartClient, Cart, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, Cart, ResponseTransformer } from '@cocart/sdk';
 
 // Define extended types
 interface EnhancedCart extends Cart {
@@ -115,13 +115,13 @@ const enhancedCartTransformer: ResponseTransformer = (endpoint, response) => {
 };
 
 // Create client with transformer
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   responseTransformer: enhancedCartTransformer
 });
 
 // Now you can use the enhanced types
-const cart = await client.request('cart') as EnhancedCart;
+const cart = await cocart.request('cart') as EnhancedCart;
 ```
 
 ## Creating Custom Request Handlers
@@ -131,10 +131,10 @@ You can extend the SDK with custom request handlers for specific endpoints or cu
 ### Custom Endpoint Handler
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Extend the client with custom methods
-class EnhancedCoCartClient extends CoCartClient {
+class EnhancedCoCartClient extends CoCart {
   // Add a custom method for a specialized endpoint
   async getProductRecommendations(cartKey: string) {
     const response = await this.request(`cart/${cartKey}/recommendations`, {
@@ -166,17 +166,17 @@ class EnhancedCoCartClient extends CoCartClient {
 }
 
 // Use the enhanced client
-const client = new EnhancedCoCartClient({
+const cocart = new EnhancedCoCartClient({
   siteUrl: 'https://example.com'
 });
 
 // Use custom methods
-const recommendations = await client.getProductRecommendations('abc123');
+const recommendations = await cocart.getProductRecommendations('abc123');
 console.log(`We found ${recommendations.length} products you might like!`);
 
 // Use the combined checkout method
 try {
-  const order = await client.quickCheckout('abc123', {
+  const order = await cocart.quickCheckout('abc123', {
     payment_method: 'stripe',
     billing_address: { /* ... */ },
     shipping_address: { /* ... */ }
@@ -231,7 +231,7 @@ function transformToSubscriptionCart(cart: Cart): SubscriptionCart {
 }
 
 // Example usage
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 const subCart = transformToSubscriptionCart(cart);
 
 if (subCart.has_subscriptions) {
@@ -247,10 +247,10 @@ You can add custom middleware to intercept and modify requests and responses.
 ### Request/Response Interceptors
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Create the client
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 
@@ -303,7 +303,7 @@ client.interceptors.response.use(
 );
 
 // Use the client normally
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 ```
 
 ## Creating SDK Plugins
@@ -313,7 +313,7 @@ You can create plugins that package multiple extensions together for reuse.
 ### Creating a Plugin
 
 ```typescript
-import { CoCartClient, CoCartPlugin } from '@cocart/sdk';
+import { CoCart, CoCartPlugin } from '@cocart/sdk';
 
 // Define a plugin interface
 interface AnalyticsPlugin extends CoCartPlugin {
@@ -326,7 +326,7 @@ interface AnalyticsPlugin extends CoCartPlugin {
 function createAnalyticsPlugin(trackingId: string): AnalyticsPlugin {
   return {
     // Plugin installation method
-    install(client: CoCartClient) {
+    install(client: CoCart) {
       // Add request interceptor
       client.interceptors.request.use(config => {
         config.headers = {
@@ -374,7 +374,7 @@ function sendAnalyticsEvent(event: string, data: any) {
 }
 
 // Use the plugin
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 
@@ -386,7 +386,7 @@ client.use(analyticsPlugin);
 analyticsPlugin.trackAddToCart(123, 2);
 
 // Make requests normally
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 // Cart views are automatically tracked by the plugin
 ```
 

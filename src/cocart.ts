@@ -24,9 +24,11 @@ export interface CurrencyFormatter {
 }
 
 /**
- * Main CoCart client class
+ * Main CoCart class
+ * 
+ * This is the main entry point for interacting with the CoCart API.
  */
-export class CoCartClient {
+export class CoCart {
   private config: CoCartConfig;
   private httpClient: HttpClient;
   private timezoneConfig: TimezoneConversionOptions;

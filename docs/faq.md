@@ -54,7 +54,7 @@ The SDK supports the following authentication methods:
 ### How do I use JWT authentication?
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   auth: {
     type: 'jwt',
@@ -70,7 +70,7 @@ const client = new CoCartClient({
 You can check if a product is already in the cart by examining the cart items:
 
 ```typescript
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 const isInCart = cart.items.some(item => item.id === productId);
 
 if (isInCart) {
@@ -85,7 +85,7 @@ While the API doesn't support batch updates natively, you can perform multiple u
 ```typescript
 async function updateMultipleItems(updates) {
   for (const update of updates) {
-    await client.cart.updateItem(update.key, { 
+    await cocart.cart.updateItem(update.key, { 
       quantity: update.quantity 
     });
   }
@@ -104,7 +104,7 @@ const updatedCart = await updateMultipleItems([
 When adding a product variation to the cart, include both the product ID and variation ID:
 
 ```typescript
-const cart = await client.cart.addItem(123, {
+const cart = await cocart.cart.addItem(123, {
   variation_id: 456,
   quantity: 1
 });
@@ -118,7 +118,7 @@ We recommend using try/catch blocks with specific error type checking:
 
 ```typescript
 try {
-  await client.cart.addItem(productId, { quantity: 2 });
+  await cocart.cart.addItem(productId, { quantity: 2 });
 } catch (error) {
   if (error.code === 'out_of_stock') {
     // Handle out of stock scenario
@@ -139,7 +139,7 @@ For robust handling of network conditions, use the NetworkError type:
 
 ```typescript
 try {
-  await client.cart.get();
+  await cocart.cart.get();
 } catch (error) {
   if (error instanceof NetworkError) {
     // Network is unavailable
@@ -159,13 +159,13 @@ Several approaches can improve performance:
 
 1. **Use field filtering** to request only the data you need:
    ```typescript
-   const cart = await client.cart.getFiltered(['items', 'totals']);
+   const cart = await cocart.cart.getFiltered(['items', 'totals']);
    ```
 
 2. **Minimize request frequency** by implementing debouncing for user-triggered actions:
    ```typescript
    const debouncedUpdate = debounce(async (key, quantity) => {
-     await client.cart.updateItem(key, { quantity });
+     await cocart.cart.updateItem(key, { quantity });
    }, 500);
    ```
 
@@ -248,7 +248,7 @@ This could be due to:
 Try explicitly requesting the fields you need:
 
 ```typescript
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { include: 'your_missing_field,another_field' }
 });
 ```

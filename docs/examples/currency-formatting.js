@@ -6,18 +6,18 @@
  */
 
 // Import the CoCart SDK
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Basic usage - automatic formatting with defaults
 async function basicExample() {
   // Create a client with currency formatting enabled
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     currency: true // Enables currency formatting with default settings
   });
   
   // Get a cart - currency values will be automatically formatted
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   console.log('Cart Summary:');
   console.log(`Subtotal: ${cart.totals.subtotal}`);
@@ -46,7 +46,7 @@ async function basicExample() {
 // Advanced usage - custom configuration
 async function advancedExample() {
   // Create a client with advanced currency options
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     currency: {
       enabled: true,
@@ -61,7 +61,7 @@ async function advancedExample() {
   });
   
   // Get products with pricing
-  const products = await client.request('products?include=price,regular_price,sale_price');
+  const products = await cocart.request('products?include=price,regular_price,sale_price');
   
   console.log('Products with Formatted Prices:');
   products.forEach(product => {
@@ -86,7 +86,7 @@ async function advancedExample() {
 
 // Custom formatting function example
 async function customFormattingExample() {
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     currency: {
       enabled: true,
@@ -116,7 +116,7 @@ async function customFormattingExample() {
     }
   });
   
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   console.log(`Custom formatted total: ${cart.totals.total}`);
 }
 
@@ -124,7 +124,7 @@ async function customFormattingExample() {
 async function multiCurrencyExample() {
   // Function to create a client for a specific store
   function createClient(siteUrl) {
-    return new CoCartClient({
+    return new CoCart({
       siteUrl,
       currency: true
     });
@@ -152,12 +152,12 @@ async function multiCurrencyExample() {
 
 // Working with currency in smallest units (e.g., cents)
 async function smallestUnitExample() {
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     currency: true
   });
   
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   console.log("Working with Smallest Currency Units:");
   console.log(`Formatted total: ${cart.totals.total}`);              // e.g., "$45.99"
@@ -185,12 +185,12 @@ async function directFormattingExample() {
   } = require('@cocart/sdk');
   
   // Get currency info from a response
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     currency: false // Disable automatic formatting
   });
   
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   const currencyInfo = extractCurrencyInfo(cart);
   
   if (currencyInfo) {

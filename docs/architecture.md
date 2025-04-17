@@ -44,7 +44,7 @@ The SDK is built on the following architectural principles:
 
 ## Core Components
 
-### CoCartClient
+### CoCart
 
 The central class that developers interact with. It:
 - Manages configuration
@@ -62,7 +62,7 @@ interface CoCartConfig {
   timezoneConversion?: boolean | TimezoneConfig;
 }
 
-class CoCartClient {
+class CoCart {
   // Endpoints
   public cart: CartEndpoint;
   public products: ProductsEndpoint;
@@ -92,7 +92,7 @@ All endpoint classes extend this base class to inherit common functionality:
 
 ```typescript
 class BaseEndpoint {
-  constructor(protected client: CoCartClient) {}
+  constructor(protected cocart: CoCart) {}
   
   protected async makeRequest<T>(
     endpoint: string,
@@ -175,12 +175,12 @@ Events are emitted at key points in the request lifecycle:
 Interceptors can modify requests or responses:
 
 ```typescript
-client.interceptors.request.use(config => {
+cocart.interceptors.request.use(config => {
   // Modify request config
   return config;
 });
 
-client.interceptors.response.use(
+cocart.interceptors.response.use(
   response => {
     // Handle successful response
     return response;
@@ -215,7 +215,7 @@ class CustomEndpoint extends BaseEndpoint {
 └───────────────────────────┬─────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────┐
-│                      CoCartClient                        │
+│                      CoCart                              │
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
 │  ┌─────────────┐   ┌────────────┐   ┌────────────────┐  │

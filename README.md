@@ -67,10 +67,10 @@ For the best experience with this SDK, use the following TypeScript compiler opt
 ## Basic Usage
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Initialize client
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   // Optional configurations
   apiVersion: 'v2',
@@ -81,7 +81,7 @@ const client = new CoCartClient({
 // Example: Get cart contents
 async function getCart() {
   try {
-    const cart = await client.cart.get();
+    const cart = await cocart.cart.get();
     console.log(cart);
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -91,7 +91,7 @@ async function getCart() {
 // Example: Add item to cart
 async function addToCart() {
   try {
-    const result = await client.cart.addItem({
+    const result = await cocart.cart.addItem({
       id: 123,
       quantity: 1,
     });
@@ -122,7 +122,7 @@ The SDK supports multiple authentication methods:
 ### Basic Authentication
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   auth: {
     type: 'basic',
@@ -135,7 +135,7 @@ const client = new CoCartClient({
 ### JWT Authentication
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   auth: {
     type: 'jwt',
@@ -154,15 +154,15 @@ The `HTTPClient` constructor takes an optional `fetcher` argument that can be us
 The following example shows how to use the `"beforeRequest"` hook to add a custom header and a timeout to requests and how to use the `"requestError"` hook to log errors:
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Create a client with interceptors
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
 });
 
 // Add a request interceptor that modifies requests before they're sent
-client.interceptors.request.use(config => {
+cocart.interceptors.request.use(config => {
   // Add a custom header
   config.headers = {
     ...config.headers,
@@ -186,7 +186,7 @@ client.interceptors.request.use(config => {
 });
 
 // Add a response interceptor
-client.interceptors.response.use(
+cocart.interceptors.response.use(
   // For successful responses
   response => {
     console.log(`Request to ${response.config.endpoint} succeeded`);
@@ -226,7 +226,7 @@ client.interceptors.response.use(
 // Use the client with the interceptors
 async function fetchCart() {
   try {
-    const cart = await client.cart.get();
+    const cart = await cocart.cart.get();
     return cart;
   } catch (error) {
     // Error handling at call site
@@ -246,16 +246,16 @@ Some of the endpoints in this SDK support pagination. To use pagination, you mak
 Here's an example of one such pagination call:
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
 });
 
 // Example 1: Using async iteration to process all pages of products
 async function getAllProducts() {
   try {
-    const productsResponse = await client.products.getAll({
+    const productsResponse = await cocart.products.getAll({
       per_page: 20, // items per page
     });
     
@@ -283,7 +283,7 @@ async function getProductsWithManualPagination() {
     let hasMorePages = true;
     
     while (hasMorePages) {
-      const productsResponse = await client.products.getAll({
+      const productsResponse = await cocart.products.getAll({
         per_page: 20,
         page: page,
       });
@@ -308,7 +308,7 @@ async function getProductsWithManualPagination() {
 // Example 3: Using pagination metadata
 async function getProductsWithPaginationInfo() {
   try {
-    const productsResponse = await client.products.getAll({
+    const productsResponse = await cocart.products.getAll({
       per_page: 20,
     });
     

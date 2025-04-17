@@ -35,15 +35,15 @@ yarn add @cocart/sdk
 Create a client instance with your store URL:
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Create the client with minimal configuration
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 
 // With more options
-const clientWithOptions = new CoCartClient({
+const clientWithOptions = new CoCart({
   siteUrl: 'https://example.com',
   apiVersion: 'v2',
   auth: {
@@ -63,7 +63,7 @@ const clientWithOptions = new CoCartClient({
 ```typescript
 // Get the current cart
 try {
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   console.log(`Cart contains ${cart.items_count} items`);
   console.log(`Cart total: ${cart.totals.total}`);
@@ -76,7 +76,7 @@ try {
 
 ```typescript
 try {
-  await client.cart.clear();
+  await cocart.cart.clear();
   console.log('Cart cleared successfully');
 } catch (error) {
   console.error('Failed to clear cart:', error.message);
@@ -90,7 +90,7 @@ try {
 ```typescript
 // Add a product to the cart
 try {
-  const cart = await client.cart.addItem(123, { 
+  const cart = await cocart.cart.addItem(123, { 
     quantity: 2,
     variation_id: 456, // Optional variation ID
   });
@@ -106,7 +106,7 @@ try {
 ```typescript
 // Update a cart item
 try {
-  const cart = await client.cart.updateItem('a8baa56554f96369ab93e4f3bb068c22', { 
+  const cart = await cocart.cart.updateItem('a8baa56554f96369ab93e4f3bb068c22', { 
     quantity: 3
   });
   
@@ -121,7 +121,7 @@ try {
 ```typescript
 // Remove an item from the cart
 try {
-  const cart = await client.cart.removeItem('a8baa56554f96369ab93e4f3bb068c22');
+  const cart = await cocart.cart.removeItem('a8baa56554f96369ab93e4f3bb068c22');
   
   console.log('Item removed successfully');
 } catch (error) {
@@ -135,7 +135,7 @@ The SDK uses a comprehensive error system to help you handle various error scena
 
 ```typescript
 try {
-  await client.cart.addItem(123, { quantity: 2 });
+  await cocart.cart.addItem(123, { quantity: 2 });
 } catch (error) {
   if (error.code === 'out_of_stock') {
     console.error('This product is out of stock');
@@ -154,14 +154,14 @@ For more advanced error handling, check the [Error Handling](./error-handling.md
 TypeScript provides full type information for all SDK methods:
 
 ```typescript
-import { CoCartClient, Cart, CartItem } from '@cocart/sdk';
+import { CoCart, Cart, CartItem } from '@cocart/sdk';
 
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 
 // Types are automatically inferred
-const cart = await client.cart.get();
+const cart = await cocart.cart.get();
 const items: CartItem[] = cart.items;
 
 // Work with typed data

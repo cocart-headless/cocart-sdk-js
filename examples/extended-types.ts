@@ -1,4 +1,4 @@
-import { CoCartClient, CartItem, Extend, ResponseTransformer } from '../src';
+import { CoCart, CartItem, Extend, ResponseTransformer } from '../src';
 
 // Example of extending the CartItem type with additional fields
 interface ExtendedCartItem extends CartItem {
@@ -24,7 +24,7 @@ const responseTransformer: ResponseTransformer<any, any> = (response) => {
 };
 
 // Initialize client with the transformer
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   apiVersion: 'v2',
   apiPrefix: 'wp-json/cocart',
@@ -35,7 +35,7 @@ const client = new CoCartClient({
 async function getExtendedCartItems(): Promise<ExtendedCartItem[]> {
   try {
     // The API might return additional fields we've defined in ExtendedCartItem
-    const cart = await client.cart.get();
+    const cart = await cocart.cart.get();
     
     // Use type assertion to treat items as extended type
     const extendedItems = cart.items as unknown as ExtendedCartItem[];
@@ -68,7 +68,7 @@ type CustomCartItem = Extend<CartItem, {
 }>;
 
 async function processCustomItems() {
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   // Cast to our custom type
   const customItems = cart.items as unknown as CustomCartItem[];

@@ -25,16 +25,16 @@ The CoCart SDK provides built-in currency formatting functionality that:
 Currency formatting can be enabled when creating a CoCart client:
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Enable currency formatting with default settings
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: true // Enables currency formatting with default settings
 });
 
 // OR with custom configuration
-const clientWithCustomConfig = new CoCartClient({
+const clientWithCustomConfig = new CoCart({
   siteUrl: 'https://example.com',
   currency: {
     enabled: true,
@@ -91,13 +91,13 @@ When `enabled` is set to `true` and other options aren't specified, both `autoFo
 ### Basic Usage
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: true
 });
 
 // Get cart with formatted currency values
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 
 // Display formatted prices
 cart.items.forEach(item => {
@@ -120,7 +120,7 @@ console.log(`Calculated Total: ${itemTotal}`);
 If you have custom plugins that add additional currency fields:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: {
     enabled: true,
@@ -133,7 +133,7 @@ const client = new CoCartClient({
   }
 });
 
-const order = await client.request('order/123');
+const order = await cocart.request('order/123');
 
 // All currency fields will be formatted
 console.log(`Order Total: ${order.total}`);
@@ -144,12 +144,12 @@ console.log(`Insurance: ${order.insurance_premium}`);
 ### Working with Formatted and Original Values
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: true
 });
 
-const products = await client.request('products');
+const products = await cocart.request('products');
 
 // Calculate discounts using original values
 products.forEach(product => {
@@ -166,7 +166,7 @@ products.forEach(product => {
 ### Custom Formatting Function
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: {
     enabled: true,
@@ -187,7 +187,7 @@ const client = new CoCartClient({
   }
 });
 
-const cart = await client.request('cart');
+const cart = await cocart.request('cart');
 console.log(`Total: ${cart.totals.total}`); // "45.99 USD" instead of "$45.99"
 ```
 

@@ -59,24 +59,24 @@ The CoCart SDK is designed to handle filtered responses automatically. When you 
 ### Making Filtered Requests
 
 ```typescript
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com'
 });
 
 // Request only specific fields
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { fields: 'cart_key,items,totals' }
 });
 
 // Include additional fields
-const cartWithExtras = await client.request('cart', {
+const cartWithExtras = await cocart.request('cart', {
   params: { include: 'custom_fields,product_addons' }
 });
 
 // Exclude fields you don't need
-const cartWithoutSomeFields = await client.request('cart', {
+const cartWithoutSomeFields = await cocart.request('cart', {
   params: { exclude: 'notices,removed_items,cross_sells' }
 });
 ```
@@ -87,7 +87,7 @@ const cartWithoutSomeFields = await client.request('cart', {
 
 ```typescript
 // Get cart with specific additional fields
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { include: 'product_addons,attributes' }
 });
 
@@ -124,7 +124,7 @@ interface AddonCartItem extends CartItem {
 }
 
 // Request cart with addons included
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { include: 'product_addons' }
 });
 
@@ -152,13 +152,13 @@ When using both field filtering and currency formatting together, you get powerf
 
 ```typescript
 // Create a client with currency formatting enabled
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: true // Enable currency formatting
 });
 
 // Request specific fields and include additional ones
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: {
     fields: 'cart_key,items,totals',
     include: 'custom_fields'
@@ -187,7 +187,7 @@ When dealing with large carts, you might want to request only essential fields t
 
 ```typescript
 // Get minimal cart information
-const basicCart = await client.request('cart', {
+const basicCart = await cocart.request('cart', {
   params: { fields: 'cart_key,items_count,totals' }
 });
 
@@ -213,7 +213,7 @@ interface ProductWithCustomFields extends CartItem {
 }
 
 // Request cart with custom fields
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { include: 'custom_product_fields' }
 });
 
@@ -259,7 +259,7 @@ interface DetailedSubscriptionItem extends CartItem {
 }
 
 // Request cart with subscription details
-const cart = await client.request('cart', {
+const cart = await cocart.request('cart', {
   params: { include: 'subscription_details,billing_schedule' }
 });
 
@@ -292,13 +292,13 @@ For mobile applications where bandwidth might be limited, you can combine field 
 
 ```typescript
 // Create client with currency formatting enabled
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   currency: true
 });
 
 // For product listing view, request minimal fields
-const products = await client.request('products', {
+const products = await cocart.request('products', {
   params: {
     fields: 'id,name,price,sale_price,images.thumbnail',
     per_page: 10,
@@ -316,7 +316,7 @@ products.forEach(product => {
 });
 
 // For product detail view, get all fields for a specific product
-const productDetail = await client.request(`products/${productId}`);
+const productDetail = await cocart.request(`products/${productId}`);
 
 console.log(`${productDetail.name}: ${productDetail.price}`);
 console.log(`Description: ${productDetail.description}`);

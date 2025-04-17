@@ -26,13 +26,13 @@ This document outlines potential features that could be added to the CoCart SDK 
 **Example**:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   optimisticUpdates: true
 });
 
 // Cart immediately updated in client cache, then synced with server
-await client.items.update('item_key', { quantity: 3 });
+await cocart.items.update('item_key', { quantity: 3 });
 
 // If server returns error, optimistic update is rolled back automatically
 ```
@@ -49,7 +49,7 @@ await client.items.update('item_key', { quantity: 3 });
 **Example**:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   cache: {
     enabled: true,
@@ -63,7 +63,7 @@ const client = new CoCartClient({
 });
 
 // Cached data used when available and not expired
-const products = await client.request('products');
+const products = await cocart.request('products');
 ```
 
 ## 3. Enhanced Error Handling and Debugging
@@ -78,7 +78,7 @@ const products = await client.request('products');
 **Example**:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   debugging: {
     level: 'verbose', // 'error', 'warn', 'info', 'verbose', 'debug'
@@ -90,7 +90,7 @@ const client = new CoCartClient({
 
 // Detailed logs help identify issues faster
 try {
-  await client.items.add(123, { quantity: 2 });
+  await cocart.items.add(123, { quantity: 2 });
 } catch (error) {
   // Error contains detailed information and context
   console.error(error.code, error.message, error.context);
@@ -128,7 +128,7 @@ const analyticsPlugin = {
 };
 
 // Use the plugin
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   plugins: [analyticsPlugin]
 });
@@ -148,7 +148,7 @@ const client = new CoCartClient({
 ```typescript
 // In Next.js getServerSideProps
 export async function getServerSideProps(context) {
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     ssr: {
       enabled: true,
@@ -157,7 +157,7 @@ export async function getServerSideProps(context) {
     }
   });
   
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   return {
     props: {
@@ -180,7 +180,7 @@ export async function getServerSideProps(context) {
 **Example**:
 
 ```typescript
-const client = new CoCartClient({
+const cocart = new CoCart({
   siteUrl: 'https://example.com',
   fieldTransformers: [
     {
@@ -211,7 +211,7 @@ const client = new CoCartClient({
 
 ```typescript
 // Get type definitions that match the fields requested
-const cart = await client.request<CartWithSelectedFields>('cart', {
+const cart = await cocart.request<CartWithSelectedFields>('cart', {
   params: { fields: 'items,totals' }
 });
 

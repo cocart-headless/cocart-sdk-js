@@ -1,5 +1,5 @@
 // Export main client
-export { CoCartClient } from './cocart-client';
+export { CoCart } from './cocart';
 
 // Export types
 export * from './types';

@@ -6,18 +6,18 @@
  */
 
 // Import the CoCart SDK
-import { CoCartClient } from '@cocart/sdk';
+import { CoCart } from '@cocart/sdk';
 
 // Basic usage - automatic conversion to browser timezone
 async function basicExample() {
   // Create a client with timezone conversion enabled
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     timezoneConversion: true // Use browser's timezone
   });
   
   // Get an order - dates will be automatically converted
-  const order = await client.request('orders/123');
+  const order = await cocart.request('orders/123');
   
   console.log(`Order #${order.id}`);
   console.log(`Created: ${order.date_created}`); // Converted to browser timezone
@@ -34,7 +34,7 @@ async function basicExample() {
 // Advanced usage - custom timezone and formatting
 async function advancedExample() {
   // Create a client with advanced timezone options
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     timezoneConversion: {
       enabled: true,
@@ -59,7 +59,7 @@ async function advancedExample() {
   });
   
   // Get subscription details with dates
-  const subscription = await client.request('subscriptions/456');
+  const subscription = await cocart.request('subscriptions/456');
   
   console.log(`Subscription: ${subscription.id}`);
   
@@ -74,13 +74,13 @@ async function advancedExample() {
 // Dynamic timezone updates
 async function dynamicTimezoneExample() {
   // Create client with initial settings
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     timezoneConversion: true
   });
   
   // Get order with browser timezone
-  let order = await client.request('orders/123');
+  let order = await cocart.request('orders/123');
   console.log(`Order date (browser timezone): ${order.date_created}`);
   
   // User selects a different timezone - update the config
@@ -93,13 +93,13 @@ async function dynamicTimezoneExample() {
   });
   
   // Get fresh order data with new timezone settings
-  order = await client.request('orders/123');
+  order = await cocart.request('orders/123');
   console.log(`Order date (Tokyo timezone): ${order.date_created}`);
 }
 
 // Handling different date formats across an e-commerce app
 async function ecommerceExample() {
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     timezoneConversion: {
       enabled: true,
@@ -121,20 +121,20 @@ async function ecommerceExample() {
   });
   
   // Dashboard - Get orders with dates
-  const orders = await client.request('orders');
+  const orders = await cocart.request('orders');
   console.log('Recent Orders:');
   orders.forEach(order => {
     console.log(`#${order.id} - ${order.date_created} - $${order.total}`);
   });
   
   // Product details - Get product with availability date
-  const product = await client.request('products/789');
+  const product = await cocart.request('products/789');
   if (product.backorder_expected_date) {
     console.log(`Back in stock on: ${product.backorder_expected_date}`);
   }
   
   // Subscription details 
-  const subscription = await client.request('subscriptions/456');
+  const subscription = await cocart.request('subscriptions/456');
   console.log(`Next payment: ${subscription.next_payment_date}`);
   
   if (subscription.trial_end_date) {
@@ -144,13 +144,13 @@ async function ecommerceExample() {
 
 // Example showing how to handle custom product fields with dates
 async function customFieldsExample() {
-  const client = new CoCartClient({
+  const cocart = new CoCart({
     siteUrl: 'https://example.com',
     timezoneConversion: true
   });
   
   // Get the cart
-  const cart = await client.cart.get();
+  const cart = await cocart.cart.get();
   
   // Process items with custom date fields
   cart.items.forEach(item => {

@@ -1,12 +1,12 @@
-import { CoCartClient } from '../cocart-client';
+import { CoCart } from '../cocart';
 
 /**
  * Base class for all API endpoints
  */
 export abstract class BaseEndpoint {
-  protected client: CoCartClient;
+  protected cocart: CoCart;
 
-  constructor(client: CoCartClient) {
-    this.client = client;
+  constructor(cocart: CoCart) {
+    this.cocart = cocart;
   }
 }
