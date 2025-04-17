@@ -1,114 +1,131 @@
 # Error Handling in CoCart SDK
 
-This document explains the error handling system in the CoCart SDK and how to effectively work with errors in your applications.
+**Navigation:**
+- [Documentation Index](./index.md)
+- [Back to README](../README.md)
+- [Architecture Overview](./architecture.md)
+- [API Design Patterns](./api-design-patterns.md)
+- [API Field Filtering](./api-field-filtering.md)
+- [Currency Handling](./currency-handling.md)
+- [Timezone Handling](./timezone-handling.md)
+- [Working with Extended Responses](./working-with-extended-responses.md)
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Error Hierarchy](#error-hierarchy)
-3. [Handling Errors](#handling-errors)
-4. [Error Events](#error-events)
-5. [Common Error Codes](#common-error-codes)
-6. [Best Practices](#best-practices)
-
-## Overview
-
-The CoCart SDK provides a comprehensive error handling system that enhances the error responses from the CoCart API. While the API already returns standardized error responses when issues occur server-side, the SDK's error handling system offers several additional benefits:
-
-- **Unified error format** for both API errors and client-side issues
-- **Error categorization** through a hierarchy of error classes
-- **Additional context** beyond what's provided in API responses
-- **Client-side validation** and error detection
-- **Event-based error monitoring**
-
-This system makes it easier to handle errors consistently across your application, regardless of whether they originate from the API server, network issues, or local validation.
+- [Error Hierarchy](#error-hierarchy)
+- [Handling Errors](#handling-errors)
+- [Error Events](#error-events)
+- [Common Error Codes](#common-error-codes)
+- [Best Practices](#best-practices)
 
 ## Error Hierarchy
 
-The SDK uses a consistent hierarchy of error classes to provide detailed and specific error information:
-
-```
-Error (JavaScript built-in)
-└── CoCartError (Base SDK error)
-    ├── APIError (HTTP errors from the API)
-    ├── NetworkError (Connection/network issues)
-    └── ValidationError (Input validation errors)
-```
+The CoCart SDK uses a structured error hierarchy to provide detailed information about what went wrong:
 
 ### CoCartError
 
-The base error class for all SDK errors, containing:
-
-- `message`: Human-readable error description
-- `code`: Machine-readable error code
-- `context`: Additional information about the error context
+The base error class for all SDK errors. All other error types extend this class.
 
 ```typescript
-// Example CoCartError
-{
-  name: 'CoCartError',
-  message: 'Request failed',
-  code: 'request_failed',
-  context: {
-    endpoint: 'cart',
-    options: { method: 'GET' },
-    originalError: Error // Original error that caused this
+try {
+  // SDK operations
+} catch (error) {
+  if (error instanceof CoCartError) {
+    console.error('CoCart SDK error:', error.message);
   }
 }
 ```
 
 ### APIError
 
-Represents errors returned by the CoCart API, containing:
+Thrown when the API responds with an error status code. Contains detailed information about the error from the API response.
 
-- All properties from CoCartError
+Properties:
 - `status`: HTTP status code
-- `data`: Response data from the API, including any error details
-- `headers`: Response headers
-
-This class handles standardized error responses from the CoCart API, parsing the response data and providing convenient access to the error information.
+- `code`: Error code from the API
+- `data`: Additional error data from the API
 
 ```typescript
-// Example APIError
-{
-  name: 'APIError',
-  message: 'Product not found',
-  code: 'wc_item_not_found',
-  status: 404,
-  data: {
-    code: 'wc_item_not_found',
-    message: 'Product not found',
-    data: { status: 404 }
-  },
-  context: { /* ... */ }
+try {
+  await client.cart.addItem(123);
+} catch (error) {
+  if (error instanceof APIError) {
+    console.error(`API Error ${error.status}: ${error.code} - ${error.message}`);
+    console.log('Additional data:', error.data);
+  }
 }
 ```
 
 ### NetworkError
 
-Represents network-related errors that occur before reaching the API:
+Thrown when a network request fails (connection issues, timeouts, etc.).
 
-- All properties from CoCartError
-- `originalError`: The original network error
+Properties:
+- `originalError`: The original error that caused the network failure
 
-This class helps distinguish connectivity issues from API errors, allowing for different handling strategies.
+```typescript
+try {
+  await client.cart.getCart();
+} catch (error) {
+  if (error instanceof NetworkError) {
+    console.error('Network error:', error.message);
+    // Log the original error if needed
+    if (error.originalError) {
+      console.error('Original error:', error.originalError);
+    }
+  }
+}
+```
 
 ### ValidationError
 
-Represents validation errors that may occur client-side or server-side:
+Thrown when input validation fails before making a request.
 
-- All properties from CoCartError
-- `fieldErrors`: Object mapping field names to error messages
+Properties:
+- `errors`: Record of field names to error messages
 
 ```typescript
-// Example ValidationError
-{
-  name: 'ValidationError',
-  message: 'Invalid input data',
-  code: 'validation_error',
-  fieldErrors: {
-    quantity: ['Quantity must be a positive number'],
-    product_id: ['Product ID is required']
+try {
+  await client.cart.updateItem('invalid-key', { quantity: -1 });
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.error('Validation error:', error.message);
+    // Handle specific field errors
+    Object.entries(error.errors).forEach(([field, messages]) => {
+      console.error(`${field}: ${messages.join(', ')}`);
+    });
+  }
+}
+```
+
+### AuthenticationError
+
+Thrown when authentication fails (invalid credentials, expired token, etc.).
+
+```typescript
+try {
+  await client.cart.getCart();
+} catch (error) {
+  if (error instanceof AuthenticationError) {
+    console.error('Authentication error:', error.message);
+    // Redirect to login page or refresh token
+  }
+}
+```
+
+### TimeoutError
+
+Thrown when a request times out.
+
+Properties:
+- `timeoutMs`: The timeout duration in milliseconds
+
+```typescript
+try {
+  await client.cart.getCart();
+} catch (error) {
+  if (error instanceof TimeoutError) {
+    console.error(`Request timed out after ${error.timeoutMs}ms`);
   }
 }
 ```
@@ -117,72 +134,56 @@ Represents validation errors that may occur client-side or server-side:
 
 ### Basic Error Handling
 
+The recommended pattern for handling errors is to use try/catch blocks around SDK operations:
+
 ```typescript
 try {
-  const cart = await client.cart.addItem(123, { quantity: 2 });
-  // Success - process cart
+  const cart = await client.cart.getCart();
+  // Handle successful response
 } catch (error) {
-  if (error instanceof APIError) {
-    console.error(`API Error (${error.status}): ${error.message}`);
-    
-    // Access the original API response
-    console.log('API response data:', error.data);
-    
-    // Handle specific API error codes
-    if (error.code === 'wc_item_not_found') {
-      showProductNotFoundMessage();
-    }
-  } else if (error instanceof NetworkError) {
-    console.error(`Network Error: ${error.message}`);
-    showOfflineMessage();
-  } else if (error instanceof ValidationError) {
-    console.error(`Validation Error: ${error.message}`);
-    // Display field-specific errors
-    Object.entries(error.fieldErrors || {}).forEach(([field, messages]) => {
-      console.error(`- ${field}: ${messages.join(', ')}`);
-    });
-  } else if (error instanceof CoCartError) {
-    console.error(`CoCart Error: ${error.message} (${error.code})`);
-  } else {
-    console.error(`Unexpected error: ${error.message}`);
-  }
+  // Handle error
+  console.error('Failed to get cart:', error.message);
 }
 ```
 
-### Type Narrowing with TypeScript
+### TypeScript Type Narrowing
 
-The error classes are designed to work well with TypeScript's type narrowing:
+With TypeScript, you can use type narrowing to handle different error types:
 
 ```typescript
 try {
-  // Code that might throw
-} catch (error: unknown) {
-  if (error instanceof APIError) {
-    // TypeScript knows this is an APIError
-    const { status, data } = error;
-    
-    if (status === 401) {
-      // Handle unauthorized error
-    }
+  await client.cart.addItem(123, { quantity: 2 });
+} catch (error) {
+  if (error instanceof AuthenticationError) {
+    // Handle authentication error
   } else if (error instanceof ValidationError) {
-    // TypeScript knows this is a ValidationError
-    const { fieldErrors } = error;
-  } 
-  // etc.
+    // Handle validation error
+  } else if (error instanceof APIError) {
+    // Handle API error
+  } else if (error instanceof NetworkError) {
+    // Handle network error
+  } else {
+    // Handle unknown error
+    console.error('Unknown error:', error);
+  }
 }
 ```
 
 ## Error Events
 
-The SDK emits error events that you can listen for, allowing centralized error handling:
+The SDK emits events when errors occur, allowing you to centralize error handling:
 
 ```typescript
 client.on('requestError', (endpoint, error) => {
-  // Log all errors
-  console.error(`Error in ${endpoint} request:`, error);
+  console.error(`Error in ${endpoint}:`, error);
   
-  // Send to error tracking service
-  errorTrackingService.captureException(error);
+  // Global error reporting
+  reportErrorToMonitoringService(error);
+  
+  // User notification for certain errors
+  if (error instanceof NetworkError) {
+    showNotification('Network connection issue. Please check your internet connection.');
+  }
 });
 ```
 
@@ -190,96 +191,116 @@ client.on('requestError', (endpoint, error) => {
 
 | Code | Description |
 |------|-------------|
-| `request_failed` | Generic request failure |
-| `network_error` | Network connection issues |
-| `validation_error` | Input validation failed |
-| `authentication_error` | Authentication issues |
-| `not_found` | Resource not found |
-| `server_error` | Server-side error |
-| `timeout` | Request timed out |
-
-API-specific error codes start with their own prefixes, such as `wc_` for WooCommerce and `cocart_` for CoCart. These codes come directly from the API response and are preserved in the error objects.
+| `cart_not_found` | The requested cart could not be found |
+| `invalid_cart_item` | The cart item key is invalid or not found |
+| `invalid_product_id` | The product ID is invalid or not found |
+| `invalid_coupon` | The coupon code is invalid or cannot be applied |
+| `invalid_quantity` | The specified quantity is invalid |
+| `out_of_stock` | The product is out of stock |
+| `authentication_error` | Authentication failed or token expired |
+| `insufficient_permissions` | The authenticated user lacks permission for this action |
+| `invalid_request` | The request format is invalid |
+| `rate_limit_exceeded` | API rate limit exceeded |
 
 ## Best Practices
 
-### 1. Use specific error types for handling
+1. **Use specific error types**
 
-```typescript
-try {
-  // ...
-} catch (error) {
-  if (error instanceof APIError && error.status === 404) {
-    // Handle not found
-  }
-}
-```
+   Instead of catching all errors generically, handle specific error types to provide better user feedback.
 
-### 2. Provide user-friendly error messages
+   ```typescript
+   // ❌ Too generic
+   try {
+     await client.cart.addItem(123);
+   } catch (error) {
+     console.error('Error:', error);
+   }
 
-```typescript
-function getUserFriendlyMessage(error: unknown): string {
-  if (error instanceof NetworkError) {
-    return "We're having trouble connecting to the server. Please check your internet connection and try again.";
-  }
-  
-  if (error instanceof APIError) {
-    if (error.status === 401) {
-      return "Your session has expired. Please sign in again.";
-    }
-    
-    if (error.status === 403) {
-      return "You don't have permission to perform this action.";
-    }
-    
-    if (error.status === 404) {
-      return "The requested resource couldn't be found.";
-    }
-    
-    if (error.status >= 500) {
-      return "We're experiencing technical difficulties. Please try again later.";
-    }
-  }
-  
-  return "An unexpected error occurred. Please try again.";
-}
-```
+   // ✅ Specific error handling
+   try {
+     await client.cart.addItem(123);
+   } catch (error) {
+     if (error instanceof APIError && error.code === 'out_of_stock') {
+       showNotification('This product is currently out of stock');
+     } else if (error instanceof NetworkError) {
+       showNotification('Network connection issue. Please try again.');
+     } else {
+       showNotification('Failed to add item to cart');
+       console.error(error);
+     }
+   }
+   ```
 
-### 3. Use Error Events for Global Handling
+2. **Provide user-friendly messages**
 
-```typescript
-client.on('requestError', (endpoint, error) => {
-  // Global error logging
-  logger.error(`API Error in ${endpoint}`, {
-    code: error instanceof CoCartError ? error.code : 'unknown',
-    message: error.message,
-    endpoint
-  });
-  
-  // Show error notification to user if needed
-  if (error instanceof APIError && error.status >= 500) {
-    notifyUser("We're experiencing server issues. Our team has been notified.");
-  }
-});
-```
+   Translate technical errors into user-friendly messages.
 
-### 4. Include Debugging Information
+   ```typescript
+   function getUserFriendlyMessage(error: unknown): string {
+     if (error instanceof APIError) {
+       switch (error.code) {
+         case 'cart_not_found': return 'Your shopping cart could not be found. Please try refreshing the page.';
+         case 'out_of_stock': return 'This product is currently out of stock.';
+         // Add more cases as needed
+         default: return 'There was an issue with your request.';
+       }
+     }
+     
+     if (error instanceof NetworkError) {
+       return 'Network connection issue. Please check your internet and try again.';
+     }
+     
+     if (error instanceof ValidationError) {
+       return 'Please check your input and try again.';
+     }
+     
+     return 'An unexpected error occurred. Please try again later.';
+   }
+   ```
 
-When reporting issues, include the full error context:
+3. **Use error events for global handling**
 
-```typescript
-try {
-  // ...
-} catch (error) {
-  if (error instanceof CoCartError) {
-    // Include code and context
-    reportIssue({
-      message: error.message,
-      code: error.code,
-      context: JSON.stringify(error.context),
-      stack: error.stack
-    });
-  }
-}
-```
+   Register event handlers for centralized error logging and monitoring.
 
-By leveraging the SDK's consistent error handling system, you can create more robust applications with better user experiences when errors occur. 
+   ```typescript
+   client.on('requestError', (endpoint, error) => {
+     // Log to monitoring service with context
+     logger.error({
+       message: error.message,
+       endpoint,
+       errorType: error.constructor.name,
+       ...(error instanceof APIError && { 
+         status: error.status,
+         code: error.code
+       })
+     });
+   });
+   ```
+
+4. **Include debugging information**
+
+   When reporting issues, include detailed error information to help with diagnosis.
+
+   ```typescript
+   function reportIssue(error: unknown): void {
+     let debugInfo = {
+       timestamp: new Date().toISOString(),
+       errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+       message: error instanceof Error ? error.message : String(error)
+     };
+     
+     if (error instanceof APIError) {
+       debugInfo = {
+         ...debugInfo,
+         status: error.status,
+         code: error.code,
+         data: error.data
+       };
+     }
+     
+     console.log('Please include this information when reporting the issue:');
+     console.log(JSON.stringify(debugInfo, null, 2));
+   }
+   ```
+
+By following these guidelines, you can create a robust error handling strategy that improves both the developer experience and the end-user experience when using the CoCart SDK. 

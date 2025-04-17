@@ -1,6 +1,14 @@
 # API Design Patterns in CoCart SDK
 
-This document outlines the key API design patterns used in the CoCart SDK to ensure consistency, type safety, and predictability for developers.
+**Navigation:**
+- [Documentation Index](./index.md)
+- [Back to README](../README.md)
+- [Architecture Overview](./architecture.md)
+- [Currency Handling](./currency-handling.md)
+- [Error Handling](./error-handling.md)
+- [API Field Filtering](./api-field-filtering.md)
+- [Timezone Handling](./timezone-handling.md)
+- [Working with Extended Responses](./working-with-extended-responses.md)
 
 ## Table of Contents
 

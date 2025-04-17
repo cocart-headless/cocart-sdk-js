@@ -1,3 +1,13 @@
+**Navigation:**
+- [Documentation Index](./index.md)
+- [Back to README](../README.md)
+- [Architecture Overview](./architecture.md)
+- [API Design Patterns](./api-design-patterns.md)
+- [API Field Filtering](./api-field-filtering.md)
+- [Currency Handling](./currency-handling.md)
+- [Error Handling](./error-handling.md)
+- [Timezone Handling](./timezone-handling.md)
+
 # Working with Extended API Responses
 
 This guide explains how to work with extended API responses in the CoCart SDK, particularly when the server returns additional fields beyond what's defined in the standard interface.

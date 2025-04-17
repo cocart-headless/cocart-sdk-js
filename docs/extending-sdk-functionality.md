@@ -1,3 +1,14 @@
+**Navigation:**
+- [Documentation Index](./index.md)
+- [Back to README](../README.md)
+- [Architecture Overview](./architecture.md)
+- [API Design Patterns](./api-design-patterns.md)
+- [API Field Filtering](./api-field-filtering.md)
+- [Currency Handling](./currency-handling.md)
+- [Error Handling](./error-handling.md)
+- [Timezone Handling](./timezone-handling.md)
+- [Working with Extended Responses](./working-with-extended-responses.md)
+
 # Extending the CoCart SDK
 
 This guide explains how to extend the CoCart SDK functionality through plugins, hooks, and custom implementations.

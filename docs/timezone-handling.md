@@ -1,3 +1,13 @@
+**Navigation:**
+- [Documentation Index](./index.md)
+- [Back to README](../README.md)
+- [Architecture Overview](./architecture.md)
+- [API Design Patterns](./api-design-patterns.md)
+- [API Field Filtering](./api-field-filtering.md)
+- [Currency Handling](./currency-handling.md)
+- [Error Handling](./error-handling.md)
+- [Working with Extended Responses](./working-with-extended-responses.md)
+
 # Timezone Handling in CoCart SDK
 
 This guide explains how to work with timezones in the CoCart SDK, particularly for date and time values returned from the API.
