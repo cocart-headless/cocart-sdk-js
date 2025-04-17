@@ -1,0 +1,29 @@
+name: Check Links
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/link-checker.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.md'
+  schedule:
+    # Run once a month to check for broken links
+    - cron: '0 0 1 * *'
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: --verbose --no-progress '**/*.md' -i 429
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

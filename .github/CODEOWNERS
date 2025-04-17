@@ -1,0 +1,22 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# they will be requested for review when someone opens a pull request.
+* @cocart-headless/maintainers
+
+# Core files
+/src/ @cocart-headless/core-team
+
+# Test files
+/src/__tests__/ @cocart-headless/testing-team
+
+# Documentation
+*.md @cocart-headless/docs-team
+/docs/ @cocart-headless/docs-team
+
+# GitHub specific files
+/.github/ @cocart-headless/maintainers
+
+# Package configuration
+/package.json @cocart-headless/maintainers
+/tsconfig.json @cocart-headless/maintainers
+/tsup.config.ts @cocart-headless/maintainers 

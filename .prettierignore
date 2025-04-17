@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+lib/
+build/
+coverage/
+
+# Generated files
+*.min.js
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# Markdown files (optional)
+# *.md
+
+# Generated documentation
+docs/
+
+# Misc
+.nyc_output/
+.cache/
+.temp/
+.tmp/ 

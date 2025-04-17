@@ -1,0 +1,58 @@
+# Dependency directories
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+lib/
+build/
+coverage/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# ESLint cache
+.eslintcache
+
+# IDE / editors
+.idea/
+.vscode/
+*.sublime-*
+.history/
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Package manager lock files (optional)
+# Uncomment if you want to ignore these
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# bun.lockb
+
+# Test files
+__mocks__/
+coverage/
+.nyc_output/
+
+# Miscellaneous
+.cache/
+.temp/
+.tmp/ 
