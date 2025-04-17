@@ -1,7 +1,7 @@
 # API Design Patterns in CoCart SDK
 
 **Navigation:**
-- [Documentation Index](./index.md)
+- [Documentation Index](./README.md)
 - [Back to README](../README.md)
 - [Architecture Overview](./architecture.md)
 - [Currency Handling](./currency-handling.md)

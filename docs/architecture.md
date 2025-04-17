@@ -1,7 +1,7 @@
 # CoCart SDK Architecture Overview
 
 **Navigation:**
-- [Documentation Index](./index.md)
+- [Documentation Index](./README.md)
 - [Back to README](../README.md)
 - [API Design Patterns](./api-design-patterns.md)
 - [API Field Filtering](./api-field-filtering.md)

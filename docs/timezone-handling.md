@@ -1,5 +1,5 @@
 **Navigation:**
-- [Documentation Index](./index.md)
+- [Documentation Index](./README.md)
 - [Back to README](../README.md)
 - [Architecture Overview](./architecture.md)
 - [API Design Patterns](./api-design-patterns.md)

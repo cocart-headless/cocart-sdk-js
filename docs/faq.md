@@ -1,7 +1,7 @@
 # Frequently Asked Questions
 
 **Navigation:**
-- [Documentation Index](./index.md)
+- [Documentation Index](./README.md)
 - [Back to README](../README.md)
 - [Quick Start Guide](./quick-start.md)
 - [Error Handling](./error-handling.md)
