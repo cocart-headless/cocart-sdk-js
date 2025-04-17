@@ -1,57 +1,139 @@
-import { HttpClient, HttpRequestOptions, HttpResponse } from '../types';
-
-export class APIError extends Error {
-  public status: number;
-  public data?: any;
-
-  constructor(message: string, status: number, data?: any) {
-    super(message);
-    this.name = 'APIError';
-    this.status = status;
-    this.data = data;
-  }
-}
+import { HttpClient, HttpRequestOptions, HttpResponse, Auth } from '../types';
+import { 
+  APIError, 
+  NetworkError, 
+  TimeoutError, 
+  createErrorFromResponse 
+} from './errors';
 
 /**
  * Default HTTP client implementation using the native Fetch API
  */
 export class DefaultHttpClient implements HttpClient {
   private fetcher: typeof fetch;
+  private auth: Auth | null;
+  private onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+  private onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+  private onRequestError?: (error: Error) => void;
 
-  constructor(customFetcher?: typeof fetch) {
-    this.fetcher = customFetcher || fetch;
+  /**
+   * Create a new HTTP client
+   * 
+   * @param {Object} options - Client configuration options
+   * @param {typeof fetch} [options.fetcher] - Custom fetch implementation
+   * @param {Auth} [options.auth] - Authentication configuration
+   */
+  constructor(options: { 
+    fetcher?: typeof fetch;
+    auth?: Auth | null;
+    onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+    onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+    onRequestError?: (error: Error) => void;
+  } = {}) {
+    this.fetcher = options.fetcher || fetch;
+    this.auth = options.auth || null;
+    this.onBeforeRequest = options.onBeforeRequest;
+    this.onAfterRequest = options.onAfterRequest;
+    this.onRequestError = options.onRequestError;
   }
 
-  async request<T = any>(url: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
-    const { timeout, ...fetchOptions } = options;
+  /**
+   * Set authentication configuration
+   * 
+   * @param {Auth} auth - Authentication configuration
+   */
+  setAuth(auth: Auth | null): void {
+    this.auth = auth;
+  }
 
+  /**
+   * Set event handlers
+   * 
+   * @param {Object} handlers - Event handlers
+   */
+  setEventHandlers(handlers: {
+    onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+    onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+    onRequestError?: (error: Error) => void;
+  }): void {
+    if (handlers.onBeforeRequest) this.onBeforeRequest = handlers.onBeforeRequest;
+    if (handlers.onAfterRequest) this.onAfterRequest = handlers.onAfterRequest;
+    if (handlers.onRequestError) this.onRequestError = handlers.onRequestError;
+  }
+
+  /**
+   * Add authentication headers to request options
+   * 
+   * @param {HttpRequestOptions} options - HTTP request options
+   * @returns {HttpRequestOptions} - Options with auth headers
+   */
+  private applyAuth(options: HttpRequestOptions): HttpRequestOptions {
+    const newOptions = { ...options };
+    
+    if (!this.auth) {
+      return newOptions;
+    }
+
+    // Initialize headers if they don't exist
+    newOptions.headers = newOptions.headers || {};
+
+    // Apply authentication based on type
+    if (this.auth.type === 'basic') {
+      const credentials = btoa(`${this.auth.username}:${this.auth.password}`);
+      newOptions.headers['Authorization'] = `Basic ${credentials}`;
+    } else if (this.auth.type === 'jwt') {
+      newOptions.headers['Authorization'] = `Bearer ${this.auth.token}`;
+    }
+
+    return newOptions;
+  }
+
+  /**
+   * Make an HTTP request to the specified URL
+   * 
+   * @param {string} url - The URL to request
+   * @param {HttpRequestOptions} [options] - Request options
+   * @returns {Promise<HttpResponse<T>>} - Response object
+   * @template T - Response data type
+   */
+  async request<T = any>(url: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
+    // Apply authentication
+    const authOptions = this.applyAuth(options);
+    
     // Setup abort controller for timeout
     const controller = new AbortController();
     const { signal } = controller;
 
     // Merge with user-provided signal if any
-    if (options.signal) {
-      options.signal.addEventListener('abort', () => controller.abort());
+    if (authOptions.signal) {
+      authOptions.signal.addEventListener('abort', () => controller.abort());
     }
 
     // Set up timeout if specified
-    let timeoutId: number | undefined;
-    if (timeout) {
+    let timeoutId: NodeJS.Timeout | undefined;
+    if (authOptions.timeout) {
       timeoutId = setTimeout(() => {
         controller.abort();
-      }, timeout);
+      }, authOptions.timeout);
+    }
+
+    // Trigger before request event
+    if (this.onBeforeRequest) {
+      this.onBeforeRequest(url, authOptions);
     }
 
     try {
-      const response = await this.fetcher(url, {
-        ...fetchOptions,
+      const fetchOptions = {
+        ...authOptions,
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          ...options.headers,
+          ...authOptions.headers,
         },
         signal,
-      });
+      };
+
+      const response = await this.fetcher(url, fetchOptions);
 
       // Clear timeout if request completed
       if (timeoutId) {
@@ -77,20 +159,27 @@ export class DefaultHttpClient implements HttpClient {
 
       // Handle error responses
       if (!response.ok) {
-        throw new APIError(
-          typeof data === 'object' && data && 'message' in data
-            ? String(data.message)
-            : `Request failed with status ${response.status}`,
-          response.status,
-          data
-        );
+        const error = createErrorFromResponse(response, data);
+        
+        if (this.onRequestError) {
+          this.onRequestError(error);
+        }
+        
+        throw error;
       }
 
-      return {
+      const httpResponse: HttpResponse<T> = {
         data,
         status: response.status,
         headers: response.headers,
       };
+
+      // Trigger after request event
+      if (this.onAfterRequest) {
+        this.onAfterRequest(httpResponse);
+      }
+
+      return httpResponse;
     } catch (error) {
       // Clear timeout if request fails
       if (timeoutId) {
@@ -104,18 +193,45 @@ export class DefaultHttpClient implements HttpClient {
 
       // Handle abort errors (timeouts)
       if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new APIError('Request timed out', 408);
+        const timeoutError = new TimeoutError(
+          'Request timed out', 
+          authOptions.timeout || 0
+        );
+        
+        if (this.onRequestError) {
+          this.onRequestError(timeoutError);
+        }
+        
+        throw timeoutError;
       }
 
       // Handle other errors
-      throw new APIError(error instanceof Error ? error.message : 'Unknown error', 0);
+      const networkError = new NetworkError(
+        error instanceof Error ? error.message : 'Unknown error occurred',
+        error
+      );
+      
+      if (this.onRequestError) {
+        this.onRequestError(networkError);
+      }
+      
+      throw networkError;
     }
   }
 }
 
 /**
- * Create a custom HTTP client with an optional custom fetcher
+ * Create a custom HTTP client
+ * 
+ * @param {Object} options - Client configuration options
+ * @returns {HttpClient} - Configured HTTP client
  */
-export function createCustomHttpClient(options: { fetcher?: typeof fetch }): HttpClient {
-  return new DefaultHttpClient(options.fetcher);
+export function createCustomHttpClient(options: { 
+  fetcher?: typeof fetch;
+  auth?: Auth | null;
+  onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+  onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+  onRequestError?: (error: Error) => void;
+} = {}): HttpClient {
+  return new DefaultHttpClient(options);
 }

@@ -41,19 +41,24 @@ export interface TimezoneConversionOptions {
 }
 
 /**
- * Currency Formatter Options
+ * Currency formatting options for internal use
+ * These are not directly exposed to users but used internally
  */
-export interface CurrencyFormatterOptions {
-  /** Whether currency formatting is enabled */
-  enabled: boolean;
-  /** Custom formatter function for currency values */
-  formatFunction?: (value: number | string, currency?: CurrencyInfo) => string;
-  /** Whether to apply formatting automatically to known currency fields */
-  autoFormat?: boolean;
-  /** Field names or paths that contain currency values to format */
-  currencyFields?: string[];
-  /** Whether to preserve original values with a prefix when formatting */
-  preserveOriginal?: boolean;
+export interface CurrencyFormatterConfig {
+  /** Internal list of field names that contain currency values */
+  _currencyFields?: string[];
+  /** Default precision (decimal places) when not provided by API */
+  _precision?: number;
+  /** Default currency symbol when not provided by API */
+  _symbol?: string;
+  /** Default decimal separator when not provided by API */
+  _decimalSeparator?: string;
+  /** Default thousands separator when not provided by API */
+  _thousandSeparator?: string;
+  /** Default price format pattern when not provided by API */
+  _priceFormat?: string;
+  /** Default currency code when not provided by API */
+  _currencyCode?: string;
 }
 
 /**
@@ -94,11 +99,11 @@ export interface CoCartConfig {
   timezoneConversion?: boolean | TimezoneConversionOptions;
   
   /**
-   * Currency formatting options - if true, enables currency formatting
-   * with autoFormat and preserveOriginal set to true
-   * If an object, uses those specific options
+   * Whether to automatically format currency values in API responses.
+   * When enabled, integer values are converted to formatted strings
+   * and original values are preserved in _original_fieldname properties.
    */
-  currency?: boolean | CurrencyFormatterOptions;
+  currencyFormat?: boolean;
 }
 
 /**

@@ -2,10 +2,10 @@
  * Currency Utilities for CoCart SDK
  * 
  * Provides functionality for formatting currency values.
- * Uses built-in formatter optimized for CoCart/WooCommerce responses.
+ * Utilizes currency information provided directly from the API.
  */
 
-import { CurrencyFormatterOptions, CurrencyInfo } from '../types';
+import { CurrencyFormatterConfig, CurrencyInfo } from '../types';
 
 // Common currency fields found in WooCommerce/CoCart responses
 const COMMON_CURRENCY_FIELDS = [
@@ -31,12 +31,13 @@ const COMMON_CURRENCY_FIELDS = [
 ];
 
 /**
- * Default currency formatter that handles values in smallest currency unit
- * @param value Value to format (can be in smallest currency unit or decimal)
- * @param currency Currency configuration
+ * Format a currency value using the provided currency information
+ * 
+ * @param value - Value to format (typically in smallest currency unit)
+ * @param currency - Currency configuration from the API
  * @returns Formatted currency string
  */
-export function defaultCurrencyFormatter(
+export function formatCurrencyValue(
   value: number | string,
   currency: CurrencyInfo
 ): string {
@@ -48,19 +49,18 @@ export function defaultCurrencyFormatter(
     return String(value);
   }
   
-  // Convert from smallest currency unit (e.g., cents) to decimal value
-  // based on currency minor unit (decimal places)
-  // For example, 4599 becomes 45.99 for USD (2 decimal places)
-  // For JPY (0 decimal places), the value remains unchanged
+  // Always convert from smallest currency unit to decimal value
+  // All values from the CoCart API are in the smallest currency unit
   const divisor = Math.pow(10, currency.currency_minor_unit);
   numericValue = numericValue / divisor;
   
   try {
     // Format the number according to currency settings
-    const formatted = numericValue.toLocaleString(undefined, {
+    const formatted = new Intl.NumberFormat(undefined, {
       minimumFractionDigits: currency.currency_minor_unit,
-      maximumFractionDigits: currency.currency_minor_unit
-    });
+      maximumFractionDigits: currency.currency_minor_unit,
+      style: 'decimal', // Don't use 'currency' style to manually control symbol placement
+    }).format(numericValue);
     
     // Apply currency symbol based on position
     if (currency.currency_prefix && !currency.currency_suffix) {
@@ -74,59 +74,76 @@ export function defaultCurrencyFormatter(
     // Default to symbol on left if position not specified
     return `${currency.currency_symbol}${formatted}`;
   } catch (error) {
-    // Fallback to simple formatting if toLocaleString fails
+    // Fallback to simple formatting if Intl.NumberFormat fails
     return `${currency.currency_symbol}${numericValue.toFixed(currency.currency_minor_unit)}`;
   }
 }
 
 /**
- * Normalize currency formatter configuration
- * @param options User-provided currency formatter options or boolean
- * @returns Normalized currency formatter options
+ * Creates a currency formatter that uses the API-provided currency information
+ * 
+ * @returns A currency formatter object
  */
-export function normalizeCurrencyConfig(
-  options?: boolean | CurrencyFormatterOptions
-): CurrencyFormatterOptions {
-  // Default configuration
-  const defaultConfig: CurrencyFormatterOptions = {
-    enabled: false,
-    autoFormat: false,
-    currencyFields: COMMON_CURRENCY_FIELDS,
-    preserveOriginal: false
-  };
-  
-  // If options is a boolean, use it for the enabled property
-  // and set autoFormat and preserveOriginal to match
-  if (typeof options === 'boolean') {
-    return { 
-      ...defaultConfig, 
-      enabled: options,
-      autoFormat: options,
-      preserveOriginal: options
-    };
-  }
-  
-  // If options is an object, merge with defaults
-  if (options && typeof options === 'object') {
-    const config = { ...defaultConfig, ...options };
+export function createCurrencyFormatter() {
+  return {
+    /**
+     * Format a currency amount
+     * 
+     * @param amount - The amount to format (in smallest currency unit)
+     * @param currencyInfo - Currency info from the API response
+     * @returns Formatted currency string
+     */
+    format: (amount: number | string, currencyInfo: CurrencyInfo): string => {
+      // Handle string values
+      if (typeof amount === 'string') {
+        amount = parseFloat(amount);
+      }
+      
+      // If amount is not a valid number, return as is
+      if (isNaN(amount)) {
+        return String(amount);
+      }
+      
+      return formatCurrencyValue(amount, currencyInfo);
+    },
     
-    // If enabled is true but autoFormat/preserveOriginal not explicitly set,
-    // set them to true as well
-    if (config.enabled) {
-      if (!('autoFormat' in options)) {
-        config.autoFormat = true;
+    /**
+     * Format a decimal value (without currency symbol)
+     * 
+     * @param amount - The amount to format (in smallest currency unit)
+     * @param currencyInfo - Currency info from the API response
+     * @returns Formatted decimal string without currency symbol
+     */
+    formatDecimal: (amount: number | string, currencyInfo: CurrencyInfo): string => {
+      // Convert to number if string
+      const numericValue = typeof amount === 'string' ? parseFloat(amount) : amount;
+      
+      // Check if value is a valid number
+      if (isNaN(numericValue)) {
+        return String(amount);
       }
-      if (!('preserveOriginal' in options)) {
-        config.preserveOriginal = true;
-      }
+      
+      // Convert from smallest unit 
+      const divisor = Math.pow(10, currencyInfo.currency_minor_unit);
+      const valueToFormat = numericValue / divisor;
+      
+      return valueToFormat.toFixed(currencyInfo.currency_minor_unit);
     }
-    
-    return config;
-  }
-  
-  // Otherwise return default config
-  return defaultConfig;
+  };
 }
+
+/**
+ * Default configuration for currency formatting
+ */
+const DEFAULT_CURRENCY_CONFIG: CurrencyFormatterConfig = {
+  _currencyFields: COMMON_CURRENCY_FIELDS,
+  _precision: 2,
+  _symbol: '$',
+  _decimalSeparator: '.',
+  _thousandSeparator: ',',
+  _priceFormat: '%s%v',
+  _currencyCode: 'USD'
+};
 
 /**
  * Extract currency info from a response object
@@ -195,14 +212,14 @@ export function isCurrencyField(fieldName: string, currencyFields: string[]): bo
 /**
  * Process an object recursively and format all currency fields
  * @param obj Object to process
- * @param config Currency formatter configuration
  * @param currencyInfo Currency information for formatting
+ * @param currencyFields Optional list of field names to consider as currency
  * @returns Processed object with formatted currency values
  */
 export function processObjectCurrency(
   obj: Record<string, any>,
-  config: CurrencyFormatterOptions,
-  currencyInfo?: CurrencyInfo
+  currencyInfo: CurrencyInfo,
+  currencyFields: string[] = COMMON_CURRENCY_FIELDS
 ): Record<string, any> {
   if (!obj || typeof obj !== 'object' || !currencyInfo) {
     return obj;
@@ -212,7 +229,7 @@ export function processObjectCurrency(
   if (Array.isArray(obj)) {
     return obj.map(item => {
       if (typeof item === 'object') {
-        return processObjectCurrency(item, config, currencyInfo);
+        return processObjectCurrency(item, currencyInfo, currencyFields);
       }
       return item;
     });
@@ -220,9 +237,6 @@ export function processObjectCurrency(
   
   // Create a copy of the object to avoid mutating the original
   const result = { ...obj };
-  
-  // Get fields to process
-  const currencyFields = config.currencyFields || COMMON_CURRENCY_FIELDS;
   
   // Process each field
   for (const field of Object.keys(result)) {
@@ -242,23 +256,17 @@ export function processObjectCurrency(
         continue;
       }
       
-      // Store original if requested
-      if (config.preserveOriginal) {
-        result[`_original_${field}`] = value;
-      }
+      // Always preserve original values
+      result[`_original_${field}`] = value;
       
-      // Use custom format function or default formatter
-      if (config.formatFunction) {
-        result[field] = config.formatFunction(value, currencyInfo);
-      } else {
-        result[field] = defaultCurrencyFormatter(value, currencyInfo);
-      }
+      // Format the currency value
+      result[field] = formatCurrencyValue(value, currencyInfo);
     } else if (typeof result[field] === 'object' && result[field] !== null) {
       // Recursively process nested objects
       result[field] = processObjectCurrency(
         result[field],
-        config,
-        currencyInfo
+        currencyInfo,
+        currencyFields
       );
     }
   }
@@ -268,14 +276,14 @@ export function processObjectCurrency(
 
 /**
  * Creates a response transformer for currency formatting
- * @param config Currency formatter configuration
+ * @param enabled Whether automatic currency formatting is enabled
  * @returns Response transformer function
  */
 export function createCurrencyTransformer(
-  config: CurrencyFormatterOptions
+  enabled: boolean
 ): (endpoint: string, response: any) => any {
   return (endpoint: string, response: any) => {
-    if (!config.enabled || !response || !config.autoFormat) {
+    if (!enabled || !response) {
       return response;
     }
     
@@ -287,6 +295,6 @@ export function createCurrencyTransformer(
     }
     
     // Process the response to format currency values
-    return processObjectCurrency(response, config, currencyInfo);
+    return processObjectCurrency(response, currencyInfo);
   };
 } 

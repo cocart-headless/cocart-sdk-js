@@ -1,22 +1,27 @@
-import { CoCartConfig, DEFAULT_CONFIG, HttpClient, SDKState, Auth, JWTAuth, CurrencyFormatterOptions } from './types';
-import { DefaultHttpClient } from './http/client';
-import { getAuthHeader, getTokenExpiration } from './utils/auth';
+import { CoCartConfig, DEFAULT_CONFIG, HttpClient, SDKState, Auth, JWTAuth, HttpRequestOptions, HttpResponse } from './types';
+import { DefaultHttpClient, createCustomHttpClient } from './http/client';
+import { getTokenExpiration } from './utils/auth';
 import { 
   normalizeTimezoneConfig, 
   createTimezoneTransformer,
   TimezoneConversionOptions 
 } from './utils/timezone';
 import {
-  normalizeCurrencyConfig,
+  createCurrencyFormatter,
   createCurrencyTransformer
 } from './utils/currency';
 import { EventHandler, EventName, EventMap } from './types/utils';
 
 // Import endpoint handlers
 import { CartEndpoint } from './endpoints/cart';
-import { ItemsEndpoint } from './endpoints/items';
-import { ProductsEndpoint } from './endpoints/products';
-import { SessionEndpoint } from './endpoints/session';
+
+/**
+ * Currency formatter interface
+ */
+export interface CurrencyFormatter {
+  format(amount: number | string, currencyInfo: any): string;
+  formatDecimal(amount: number | string, currencyInfo: any): string;
+}
 
 /**
  * Main CoCart client class
@@ -25,21 +30,21 @@ export class CoCartClient {
   private config: CoCartConfig;
   private httpClient: HttpClient;
   private timezoneConfig: TimezoneConversionOptions;
-  private currencyConfig: CurrencyFormatterOptions;
+  private currencyFormatEnabled: boolean;
   private state: SDKState = {
     isAuthenticated: false,
   };
 
   // Endpoints
   public cart: CartEndpoint;
-  public items: ItemsEndpoint;
-  public products: ProductsEndpoint;
-  public session: SessionEndpoint;
-
+  
   // Event handlers
   private eventHandlers: {
     [K in EventName]?: EventHandler[]
   } = {};
+
+  // Currency formatter
+  public currencyFormatter: CurrencyFormatter;
 
   /**
    * Create a new CoCart API client
@@ -51,23 +56,43 @@ export class CoCartClient {
       ...config,
     };
 
-    // Set up HTTP client
-    this.httpClient = config.httpClient || new DefaultHttpClient();
-
-    // Initialize authentication state
-    this.initAuth(this.config.auth);
-    
     // Initialize timezone configuration
     this.timezoneConfig = normalizeTimezoneConfig(this.config.timezoneConversion);
 
-    // Initialize currency configuration
-    this.currencyConfig = normalizeCurrencyConfig(this.config.currency);
+    // Initialize currency formatter
+    this.currencyFormatEnabled = this.config.currencyFormat === true;
+    this.currencyFormatter = createCurrencyFormatter();
+
+    // Set up HTTP client with event handlers
+    this.httpClient = this.config.httpClient || createCustomHttpClient({
+      auth: this.config.auth,
+      onBeforeRequest: (url, options) => {
+        this.emit('beforeRequest', 'api', options);
+      },
+      onAfterRequest: <T>(response: HttpResponse<T>) => {
+        // Apply currency formatting if enabled
+        if (this.currencyFormatEnabled) {
+          const transformer = createCurrencyTransformer(true);
+          response.data = transformer('api', response.data);
+        }
+        
+        this.emit('afterRequest', 'api', response);
+      },
+      onRequestError: (error) => {
+        this.emit('requestError', 'api', error);
+      }
+    });
+
+    // Initialize authentication state
+    this.initAuth(this.config.auth);
 
     // Initialize endpoints
-    this.cart = new CartEndpoint(this);
-    this.items = new ItemsEndpoint(this);
-    this.products = new ProductsEndpoint(this);
-    this.session = new SessionEndpoint(this);
+    const baseUrl = this.getBaseUrl();
+    this.cart = new CartEndpoint(
+      `${baseUrl}`, 
+      this.httpClient,
+      (eventName: string, ...args: unknown[]) => this.emit(eventName as EventName, ...args as any)
+    );
   }
 
   /**
@@ -103,100 +128,6 @@ export class CoCartClient {
     }
 
     return baseUrl;
-  }
-
-  /**
-   * Make a request to the CoCart API
-   */
-  public async request<T = any>(
-    endpoint: string,
-    options: {
-      method?: string;
-      body?: any;
-      params?: Record<string, any>;
-      requiresAuth?: boolean;
-    } = {}
-  ): Promise<T> {
-    const { 
-      method = 'GET', 
-      body, 
-      params = {}, 
-      requiresAuth = false 
-    } = options;
-
-    // Build the URL with parameters
-    let url = `${this.getBaseUrl()}/${endpoint.replace(/^\/+/, '')}`;
-    
-    // Add query parameters if any
-    if (Object.keys(params).length > 0) {
-      const queryParams = new URLSearchParams();
-      
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (Array.isArray(value)) {
-            value.forEach(v => queryParams.append(`${key}[]`, String(v)));
-          } else if (typeof value === 'object') {
-            Object.entries(value).forEach(([k, v]) => {
-              queryParams.append(`${key}[${k}]`, String(v));
-            });
-          } else {
-            queryParams.append(key, String(value));
-          }
-        }
-      });
-      
-      const queryString = queryParams.toString();
-      if (queryString) {
-        url += `?${queryString}`;
-      }
-    }
-
-    // Prepare headers
-    const headers: Record<string, string> = {};
-    
-    // Add auth header if required
-    if (requiresAuth && this.config.auth) {
-      const authHeader = getAuthHeader(this.config.auth);
-      if (authHeader) {
-        headers[this.config.authHeaderName || 'Authorization'] = authHeader;
-      }
-    }
-    
-    // Add cart key if available
-    if (this.state.cartKey) {
-      headers['X-Cocart-Cart-Key'] = this.state.cartKey;
-    }
-
-    // Make the request
-    const response = await this.httpClient.request<T>(url, {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-      timeout: this.config.timeout,
-    });
-
-    // Apply response transformer if provided
-    let transformedResponse = response.data;
-    
-    // Apply timezone conversion if enabled
-    if (this.timezoneConfig.enabled) {
-      const timezoneTransformer = createTimezoneTransformer(this.timezoneConfig);
-      transformedResponse = timezoneTransformer(endpoint, transformedResponse);
-    }
-    
-    // Apply currency formatting if enabled
-    if (this.currencyConfig.enabled) {
-      const currencyTransformer = createCurrencyTransformer(this.currencyConfig);
-      transformedResponse = currencyTransformer(endpoint, transformedResponse);
-    }
-    
-    // Apply custom response transformer if provided
-    if (this.config.responseTransformer) {
-      transformedResponse = this.config.responseTransformer<T, T>(transformedResponse);
-    }
-
-    // Return the data
-    return transformedResponse;
   }
 
   /**
@@ -248,20 +179,17 @@ export class CoCartClient {
   }
   
   /**
-   * Get currency formatter configuration
+   * Check if automatic currency formatting is enabled
    */
-  public getCurrencyConfig(): CurrencyFormatterOptions {
-    return { ...this.currencyConfig };
+  public isCurrencyFormatEnabled(): boolean {
+    return this.currencyFormatEnabled;
   }
   
   /**
-   * Update currency formatter configuration
+   * Enable or disable automatic currency formatting
    */
-  public updateCurrencyConfig(config: Partial<CurrencyFormatterOptions>): void {
-    this.currencyConfig = {
-      ...this.currencyConfig,
-      ...config
-    };
+  public setCurrencyFormatEnabled(enabled: boolean): void {
+    this.currencyFormatEnabled = enabled;
   }
 
   /**

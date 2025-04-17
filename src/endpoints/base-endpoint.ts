@@ -1,63 +1,209 @@
-import { CoCartClient } from '../cocart-client';
-import { CoCartError, APIError } from '../http/errors';
-import { RequestOptions } from '../types';
+/**
+ * Base Endpoint Class
+ * 
+ * Provides common functionality for all API endpoints including:
+ * - Consistent request methods (get, post, put, delete)
+ * - Standardized error handling
+ * - Event emission for request lifecycle events
+ */
+
+import { HttpClient, HttpRequestOptions } from '../types';
+import { CoCartError, NetworkError, ValidationError } from '../http/errors';
+
+export type RequestOptions = Omit<HttpRequestOptions, 'method' | 'body'>;
 
 /**
- * Base endpoint class that provides consistent request handling
- * for all API endpoints in the CoCart SDK
+ * Base class for all API endpoints
  */
 export abstract class BaseEndpoint {
   /**
-   * Creates a new endpoint instance
-   * @param client - The CoCart client instance
+   * Base path for the endpoint
    */
-  constructor(protected client: CoCartClient) {}
+  protected readonly basePath: string;
 
   /**
-   * Template method for making API requests with consistent handling
-   * @param endpoint - The API endpoint to request
-   * @param options - Request options
-   * @returns Promise resolving to the response data
-   * @template T - The expected response type
+   * HTTP client instance
    */
-  protected async makeRequest<T>(
-    endpoint: string,
+  protected readonly httpClient: HttpClient;
+
+  /**
+   * Event emitter function
+   */
+  protected readonly emitEvent: (eventName: string, ...args: unknown[]) => void;
+
+  /**
+   * Creates a new endpoint instance
+   * 
+   * @param {string} basePath - Base path for the endpoint
+   * @param {HttpClient} httpClient - HTTP client for making requests
+   * @param {Function} emitEvent - Function to emit events
+   */
+  constructor(
+    basePath: string,
+    httpClient: HttpClient,
+    emitEvent: (eventName: string, ...args: unknown[]) => void
+  ) {
+    this.basePath = basePath;
+    this.httpClient = httpClient;
+    this.emitEvent = emitEvent;
+  }
+
+  /**
+   * Makes a GET request to the specified path
+   * 
+   * @param {string} path - Path to request
+   * @param {RequestOptions} [options] - Request options
+   * @returns {Promise<T>} - Response data
+   * @template T - Response data type
+   */
+  protected async get<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>('GET', path, undefined, options);
+  }
+
+  /**
+   * Makes a POST request to the specified path
+   * 
+   * @param {string} path - Path to request
+   * @param {any} [data] - Request data
+   * @param {RequestOptions} [options] - Request options
+   * @returns {Promise<T>} - Response data
+   * @template T - Response data type
+   */
+  protected async post<T>(path: string, data?: any, options?: RequestOptions): Promise<T> {
+    return this.request<T>('POST', path, data, options);
+  }
+
+  /**
+   * Makes a PUT request to the specified path
+   * 
+   * @param {string} path - Path to request
+   * @param {any} [data] - Request data
+   * @param {RequestOptions} [options] - Request options
+   * @returns {Promise<T>} - Response data
+   * @template T - Response data type
+   */
+  protected async put<T>(path: string, data?: any, options?: RequestOptions): Promise<T> {
+    return this.request<T>('PUT', path, data, options);
+  }
+
+  /**
+   * Makes a DELETE request to the specified path
+   * 
+   * @param {string} path - Path to request
+   * @param {RequestOptions} [options] - Request options
+   * @returns {Promise<T>} - Response data
+   * @template T - Response data type
+   */
+  protected async delete<T>(path: string, options?: RequestOptions): Promise<T> {
+    return this.request<T>('DELETE', path, undefined, options);
+  }
+
+  /**
+   * Makes a request to the specified path with the given method
+   * 
+   * @param {string} method - HTTP method
+   * @param {string} path - Path to request
+   * @param {any} [data] - Request data
+   * @param {RequestOptions} [options] - Request options
+   * @returns {Promise<T>} - Response data
+   * @template T - Response data type
+   */
+  protected async request<T>(
+    method: string,
+    path: string,
+    data?: any,
     options: RequestOptions = {}
   ): Promise<T> {
+    const url = `${this.basePath}/${path}`.replace(/\/+/g, '/').replace(/\/$/, '');
+    
+    // Prepare request options
+    const requestOptions: HttpRequestOptions = {
+      ...options,
+      method,
+    };
+
+    // Add request body if data is provided
+    if (data !== undefined) {
+      requestOptions.body = JSON.stringify(data);
+    }
+
     try {
-      // Pre-request processing
-      this.emitEvent('beforeRequest', endpoint, options);
+      // Emit beforeRequest event
+      this.emitEvent('beforeRequest', url, requestOptions);
+
+      // Make request
+      const response = await this.httpClient.request<T>(url, requestOptions);
       
-      // Make the actual request
-      const response = await this.client.request<T>(endpoint, options);
+      // Emit afterRequest event
+      this.emitEvent('afterRequest', response);
       
-      // Post-request processing
-      this.emitEvent('afterRequest', endpoint, response);
+      return response.data;
+    } catch (error) {
+      // Convert and handle errors
+      const coCartError = this.handleRequestError(error);
       
-      return response;
-    } catch (error: unknown) {
-      // Standardized error handling
-      this.emitEvent('requestError', endpoint, error);
+      // Emit requestError event
+      this.emitEvent('requestError', coCartError);
       
-      if (error instanceof APIError) {
-        throw error;
-      } else {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        throw new CoCartError(
-          errorMessage,
-          'request_failed',
-          { endpoint, options, originalError: error }
-        );
-      }
+      throw coCartError;
     }
   }
 
   /**
-   * Helper method to emit events if the client supports it
-   * @param event - Event name
-   * @param args - Event arguments
+   * Handles request errors and converts them to CoCart errors
+   * 
+   * @param {unknown} error - The error to handle
+   * @returns {CoCartError} - The converted error
    */
-  private emitEvent(event: string, ...args: unknown[]): void {
-    this.client.emit(event, ...args);
+  private handleRequestError(error: unknown): CoCartError {
+    // If it's already a CoCartError, just return it
+    if (error instanceof CoCartError) {
+      return error;
+    }
+    
+    // Handle other error types
+    if (error instanceof Error) {
+      return new NetworkError(error.message, error);
+    }
+    
+    // Handle unknown errors
+    return new NetworkError('Unknown error occurred', error);
+  }
+
+  /**
+   * Creates a URL with query parameters
+   * 
+   * @param {string} path - Base path
+   * @param {Record<string, any>} [params] - Query parameters
+   * @returns {string} - URL with query parameters
+   */
+  protected createUrl(path: string, params?: Record<string, any>): string {
+    if (!params || Object.keys(params).length === 0) {
+      return path;
+    }
+
+    const queryParams = new URLSearchParams();
+    
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined || value === null) {
+        continue;
+      }
+      
+      if (Array.isArray(value)) {
+        // Handle array parameters (e.g., ?fields[]=id&fields[]=name)
+        value.forEach(item => {
+          queryParams.append(`${key}[]`, String(item));
+        });
+      } else {
+        queryParams.append(key, String(value));
+      }
+    }
+    
+    const queryString = queryParams.toString();
+    if (queryString) {
+      return `${path}?${queryString}`;
+    }
+    
+    return path;
   }
 } 
