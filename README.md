@@ -21,7 +21,6 @@ The SDK can be installed with either [npm](https://www.npmjs.com/), [pnpm](https
 
 ### NPM
 ```bash
-# Using npm
 npm install @cocart/sdk
 ```
 
@@ -102,6 +101,19 @@ async function addToCart() {
   }
 }
 ```
+
+## SDK Architecture & Design
+
+The CoCart SDK follows a modular, layered architecture designed for a type-safe and developer-friendly experience. The SDK architecture includes:
+
+- Promise-based API for all endpoints
+- Comprehensive TypeScript integration
+- Consistent endpoint architecture
+- Structured error handling system
+- Event-based extension system
+- Built-in utilities for currency and timezone handling
+
+For a detailed overview of the SDK architecture and design principles, see the [Architecture Documentation](docs/architecture.md).
 
 ## Authentication
 
