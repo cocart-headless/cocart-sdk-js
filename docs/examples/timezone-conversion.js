@@ -84,7 +84,7 @@ async function dynamicTimezoneExample() {
   console.log(`Order date (browser timezone): ${order.date_created}`);
   
   // User selects a different timezone - update the config
-  client.updateTimezoneConfig({
+  cocart.updateTimezoneConfig({
     targetTimezone: 'Asia/Tokyo',
     dateTimeFormatter: (date) => {
       // Format date in Japanese style

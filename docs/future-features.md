@@ -162,7 +162,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       cart,
-      clientState: client.getHydrationState() // State to hydrate client-side
+      clientState: cocart.getHydrationState() // State to hydrate client-side
     }
   };
 }

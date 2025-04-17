@@ -89,7 +89,7 @@ async function updateMultipleItems(updates) {
       quantity: update.quantity 
     });
   }
-  return client.cart.get();
+  return cocart.cart.get();
 }
 
 // Usage
@@ -258,15 +258,15 @@ const cart = await cocart.request('cart', {
 Add listeners to the SDK events for debugging:
 
 ```typescript
-client.on('beforeRequest', (endpoint, options) => {
+cocart.on('beforeRequest', (endpoint, options) => {
   console.log(`Making request to ${endpoint}`, options);
 });
 
-client.on('afterRequest', (endpoint, response) => {
+cocart.on('afterRequest', (endpoint, response) => {
   console.log(`Received response from ${endpoint}`, response);
 });
 
-client.on('requestError', (endpoint, error) => {
+cocart.on('requestError', (endpoint, error) => {
   console.error(`Error in ${endpoint}`, error);
 });
 ```

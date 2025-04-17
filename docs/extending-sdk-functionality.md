@@ -255,7 +255,7 @@ const cocart = new CoCart({
 });
 
 // Add a request interceptor
-client.interceptors.request.use(config => {
+cocart.interceptors.request.use(config => {
   // Add custom headers
   config.headers = {
     ...config.headers,
@@ -275,7 +275,7 @@ client.interceptors.request.use(config => {
 });
 
 // Add a response interceptor
-client.interceptors.response.use(
+cocart.interceptors.response.use(
   response => {
     // Log success
     console.log(`Request succeeded with status: ${response.status}`);
@@ -328,7 +328,7 @@ function createAnalyticsPlugin(trackingId: string): AnalyticsPlugin {
     // Plugin installation method
     install(client: CoCart) {
       // Add request interceptor
-      client.interceptors.request.use(config => {
+      cocart.interceptors.request.use(config => {
         config.headers = {
           ...config.headers,
           'X-Analytics-ID': trackingId
@@ -337,7 +337,7 @@ function createAnalyticsPlugin(trackingId: string): AnalyticsPlugin {
       });
       
       // Add response interceptor
-      client.interceptors.response.use(response => {
+      cocart.interceptors.response.use(response => {
         if (response.config.endpoint === 'cart') {
           // Track cart view
           sendAnalyticsEvent('cart_view', {
@@ -380,7 +380,7 @@ const cocart = new CoCart({
 
 // Create and register the plugin
 const analyticsPlugin = createAnalyticsPlugin('UA-XXXXX-Y');
-client.use(analyticsPlugin);
+cocart.use(analyticsPlugin);
 
 // Use plugin methods
 analyticsPlugin.trackAddToCart(123, 2);

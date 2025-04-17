@@ -25,7 +25,7 @@ const cocart = new CoCart({
 });
 
 // Example of how you'd like to use the proposed feature
-client.someNewMethod({
+cocart.someNewMethod({
   // parameters
 });
 ```
