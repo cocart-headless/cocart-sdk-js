@@ -18,14 +18,12 @@ export class ItemsEndpoint extends BaseEndpoint {
     // If the response is a Cart object, update the cache
     if (this.isCartResponse(response)) {
       const cart = response as Cart;
-      if (cart.cart_key) {
-        // Update client state
-        this.client.setCartKey(cart.cart_key);
-        this.client.setCartHash(cart.cart_hash);
 
-        // Update cache
-        cartCache.set(`cart:${cart.cart_key}`, cart, cart.cart_hash);
-      }
+      // Update client state
+      this.client.setCartHash(cart.cart_hash);
+
+      // Update cache
+      cartCache.set(`cart:${cart.cart_key}`, cart);
     }
 
     return response;
@@ -42,8 +40,8 @@ export class ItemsEndpoint extends BaseEndpoint {
    * Update an item in the cart
    */
   async update(updateData: UpdateItemRequest): Promise<Cart | CartItem> {
-    const { cart_item_key, ...data } = updateData;
-    const response = await this.client.request<Cart | CartItem>(`cart/item/${cart_item_key}`, {
+    const { item_key, ...data } = updateData;
+    const response = await this.client.request<Cart | CartItem>(`cart/item/${item_key}`, {
       method: 'POST',
       body: data,
     });
@@ -51,14 +49,12 @@ export class ItemsEndpoint extends BaseEndpoint {
     // If the response is a Cart object, update the cache
     if (this.isCartResponse(response)) {
       const cart = response as Cart;
-      if (cart.cart_key) {
-        // Update client state
-        this.client.setCartKey(cart.cart_key);
-        this.client.setCartHash(cart.cart_hash);
 
-        // Update cache
-        cartCache.set(`cart:${cart.cart_key}`, cart, cart.cart_hash);
-      }
+      // Update client state
+      this.client.setCartHash(cart.cart_hash);
+
+      // Update cache
+      cartCache.set(`cart:${cart.cart_key}`, cart);
     }
 
     return response;
@@ -68,9 +64,9 @@ export class ItemsEndpoint extends BaseEndpoint {
    * Remove an item from the cart
    */
   async remove(removeData: RemoveItemRequest): Promise<Cart | { message: string }> {
-    const { cart_item_key, return_cart } = removeData;
+    const { item_key, return_cart } = removeData;
     const response = await this.client.request<Cart | { message: string }>(
-      `cart/item/${cart_item_key}`,
+      `cart/item/${item_key}`,
       {
         method: 'DELETE',
         params: { return_cart: return_cart ? 'true' : 'false' },
@@ -80,14 +76,12 @@ export class ItemsEndpoint extends BaseEndpoint {
     // If the response is a Cart object, update the cache
     if (this.isCartResponse(response)) {
       const cart = response as Cart;
-      if (cart.cart_key) {
-        // Update client state
-        this.client.setCartKey(cart.cart_key);
-        this.client.setCartHash(cart.cart_hash);
 
-        // Update cache
-        cartCache.set(`cart:${cart.cart_key}`, cart, cart.cart_hash);
-      }
+      // Update client state
+      this.client.setCartHash(cart.cart_hash);
+
+      // Update cache
+      cartCache.set(`cart:${cart.cart_key}`, cart);
     }
 
     return response;
@@ -121,14 +115,12 @@ export class ItemsEndpoint extends BaseEndpoint {
     // If the response is a Cart object, update the cache
     if (this.isCartResponse(response)) {
       const cart = response as Cart;
-      if (cart.cart_key) {
-        // Update client state
-        this.client.setCartKey(cart.cart_key);
-        this.client.setCartHash(cart.cart_hash);
 
-        // Update cache
-        cartCache.set(`cart:${cart.cart_key}`, cart, cart.cart_hash);
-      }
+      // Update client state
+      this.client.setCartHash(cart.cart_hash);
+
+      // Update cache
+      cartCache.set(`cart:${cart.cart_hash}`, cart);
     }
 
     return response;
@@ -142,7 +134,6 @@ export class ItemsEndpoint extends BaseEndpoint {
       response &&
       typeof response === 'object' &&
       'cart_hash' in response &&
-      'cart_key' in response &&
       'items' in response
     );
   }

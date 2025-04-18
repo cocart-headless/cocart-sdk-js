@@ -76,21 +76,20 @@ export const cartCache = new Cache();
  */
 export async function getCachedCart(
   fetcher: () => Promise<Cart>,
-  cartKey?: string,
   cartHash?: string
 ): Promise<Cart> {
-  // If we don't have a cart key, we need to fetch the cart
-  if (!cartKey) {
+  // If we don't have a cart hash, we need to fetch the cart
+  if (!cartHash) {
     const cart = await fetcher();
-    if (cart.cart_key) {
-      cartCache.set(`cart:${cart.cart_key}`, cart, cart.cart_hash);
+    if (cart.cart_hash) {
+      cartCache.set(`cart:${cart.cart_hash}`, cart);
     }
     return cart;
   }
 
   // Try to get from cache first
-  const cacheKey = `cart:${cartKey}`;
-  const cachedCart = cartCache.get<Cart>(cacheKey, cartHash);
+  const cacheHash = `cart:${cartHash}`;
+  const cachedCart = cartCache.get<Cart>(cartHash);
 
   if (cachedCart) {
     return cachedCart;
@@ -98,6 +97,6 @@ export async function getCachedCart(
 
   // Not found in cache or hash changed, fetch it
   const cart = await fetcher();
-  cartCache.set(cacheKey, cart, cart.cart_hash);
+  cartCache.set(cacheHash, cart);
   return cart;
 }

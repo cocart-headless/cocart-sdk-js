@@ -102,7 +102,6 @@ export class ProductsEndpoint extends BaseEndpoint {
   async getAll(params: PaginationParams & Record<string, any> = {}): Promise<ProductsResponse> {
     const response = await this.client.request<ProductsResponse>('products', {
       params,
-      requiresAuth: true,
     });
 
     return response;
@@ -112,9 +111,7 @@ export class ProductsEndpoint extends BaseEndpoint {
    * Get a specific product by ID
    */
   async get(productId: number): Promise<Product> {
-    return this.client.request<Product>(`products/${productId}`, {
-      requiresAuth: true,
-    });
+    return this.client.request<Product>(`products/${productId}`, {});
   }
 
   /**
@@ -126,7 +123,6 @@ export class ProductsEndpoint extends BaseEndpoint {
         search: keyword,
         ...params,
       },
-      requiresAuth: true,
     });
   }
 
@@ -142,7 +138,8 @@ export class ProductsEndpoint extends BaseEndpoint {
         category: categoryId,
         ...params,
       },
-      requiresAuth: true,
+    });
+  }
     });
   }
 

@@ -9,8 +9,8 @@ const cocart = new CoCart({
   // Optional authentication
   auth: {
     type: 'basic',
-    username: 'consumer_key',
-    password: 'consumer_secret',
+    username: 'username',
+    password: 'password',
   },
 });
 
