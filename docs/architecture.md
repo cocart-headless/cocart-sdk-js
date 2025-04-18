@@ -20,6 +20,7 @@
 4. [Data Transformation](#data-transformation)
 5. [Error Handling Flow](#error-handling-flow)
 6. [Extension Points](#extension-points)
+7. [State Management](#state-management)
 
 ## High-Level Architecture
 
@@ -207,6 +208,35 @@ class CustomEndpoint extends BaseEndpoint {
 }
 ```
 
+## State Management
+
+The SDK maintains internal state through the HTTP client:
+
+### Cart State
+- Cart key tracking
+- Cart expiration monitoring
+- Authentication state
+
+### State Transitions
+
+The SDK handles several important state transitions:
+
+1. **Cart Creation**
+   - Generates new cart key
+   - Stores in SDK state
+   - Emits `cartKeyUpdated` event
+
+2. **Authentication Changes**
+   - Updates `isAuthenticated` flag
+   - Handles cart session transfer
+   - Clears cart key when authenticated
+   - Emits `authChanged` event
+
+3. **Cart Expiration**
+   - Tracks expiration through headers
+   - Provides expiration info in events
+   - Allows implementation of expiration handling
+
 ## Architecture Diagram
 
 ```
@@ -236,4 +266,4 @@ class CustomEndpoint extends BaseEndpoint {
 └───────────────────────────────┘     └───────────────────┘
 ```
 
-This architecture allows for a clean separation of concerns while providing powerful extension points at each layer. 
+This architecture allows for a clean separation of concerns while providing powerful extension points at each layer.
