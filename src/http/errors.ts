@@ -168,6 +168,19 @@ export class TimeoutError extends NetworkError {
 }
 
 /**
+ * Error thrown when a cart validation fails
+ */
+export class CartValidationError extends CoCartError {
+  /**
+   * @param {string} message - Error message
+   */
+  constructor(message: string) {
+    super(message);
+    this.name = 'CartValidationError';
+  }
+}
+
+/**
  * Factory function to create appropriate error instances from HTTP responses
  * 
  * @param {Response} response - Fetch Response object
@@ -192,4 +205,4 @@ export function createErrorFromResponse(
   
   // Standard API errors
   return new APIError(errorResponse, status);
-} 
+}

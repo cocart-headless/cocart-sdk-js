@@ -9,6 +9,7 @@
  */
 
 import { BaseEndpoint, RequestOptions } from './base-endpoint';
+import { CartValidationError } from '../http/errors';
 import {
   Cart,
   CartItem,
@@ -127,8 +128,17 @@ export class CartEndpoint extends BaseEndpoint {
    * Create a new cart
    * 
    * @returns {Promise<Cart>} New cart
+   * @throws {CartValidationError} If cart key already exists
    */
   async create(): Promise<Cart> {
+    // Get current cart key from state
+    const currentCartKey = this.getCartKeyFromState();
+    
+    // Prevent creating new cart if one already exists
+    if (currentCartKey) {
+      throw new CartValidationError('Cannot create new cart: Cart already exists. Clear the existing cart first.');
+    }
+
     return this.request<Cart>('POST', 'cart');
   }
 

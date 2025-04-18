@@ -94,7 +94,14 @@ export class CoCart {
     this.cart = new CartEndpoint(
       `${baseUrl}`, 
       this.httpClient,
-      (eventName: string, ...args: unknown[]) => this.emit(eventName as EventName, ...args as any)
+      (eventName: string, ...args: unknown[]) => {
+        this.emit(eventName as EventName, ...args as any);
+
+        // Update cart key in SDK state
+        if (eventName === 'cartKeyUpdated' && args[0]) {
+          this.setCartKey(args[0] as string);
+        }
+      }
     );
   }
 

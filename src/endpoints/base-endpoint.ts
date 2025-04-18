@@ -135,6 +135,9 @@ export abstract class BaseEndpoint {
       // Make request
       const response = await this.httpClient.request<T>(url, requestOptions);
       
+      // Process cart headers
+      this.processCartHeaders(response.headers);
+      
       // Emit afterRequest event
       this.emitEvent('afterRequest', response);
       
@@ -147,6 +150,32 @@ export abstract class BaseEndpoint {
       this.emitEvent('requestError', coCartError);
       
       throw coCartError;
+    }
+  }
+
+  /**
+   * Process cart-related headers and handle auth state transitions
+   */
+  private processCartHeaders(headers: Headers): void {
+    const cartKey = headers.get('CoCart-API-Cart-Key');
+    const cartExpiring = headers.get('CoCart-API-Cart-Expiring');
+    const cartExpiration = headers.get('CoCart-API-Cart-Expiration');
+
+    // Get current state
+    const state = (this.httpClient as any).getState?.();
+    const isAuthenticated = state?.isAuthenticated;
+
+    if (isAuthenticated) {
+      // Clear cart key if we're authenticated - API handles the session transfer
+      (this.httpClient as any).setState?.({ cartKey: undefined });
+    } else if (cartKey) {
+      // For non-authenticated requests, update cart key as normal
+      this.emitEvent('cartKeyUpdated', {
+        cartKey,
+        expiring: cartExpiring ? parseInt(cartExpiring, 10) : undefined,
+        expiration: cartExpiration ? parseInt(cartExpiration, 10) : undefined
+      });
+      (this.httpClient as any).setState?.({ cartKey });
     }
   }
 
@@ -179,6 +208,12 @@ export abstract class BaseEndpoint {
    * @returns {string} - URL with query parameters
    */
   protected createUrl(path: string, params?: Record<string, any>): string {
+    // Add cart key to query parameters if it exists in the SDK state
+    const cartKey = this.getCartKeyFromState();
+    if (cartKey) {
+      params = { ...params, cart_key: cartKey };
+    }
+
     if (!params || Object.keys(params).length === 0) {
       return path;
     }
@@ -207,4 +242,9 @@ export abstract class BaseEndpoint {
     
     return path;
   }
-} 
+
+  // Helper method to retrieve the cart key from the SDK state
+  protected getCartKeyFromState(): string | undefined {
+    return (this.httpClient as any).getState?.().cartKey;
+  }
+}

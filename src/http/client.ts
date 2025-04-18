@@ -16,6 +16,10 @@ export class DefaultHttpClient implements HttpClient {
   private onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
   private onAfterRequest?: <T>(response: HttpResponse<T>) => void;
   private onRequestError?: (error: Error) => void;
+  private state: {
+    cartKey?: string;
+    isAuthenticated?: boolean;
+  } = {};
 
   /**
    * Create a new HTTP client
@@ -23,6 +27,7 @@ export class DefaultHttpClient implements HttpClient {
    * @param {Object} options - Client configuration options
    * @param {typeof fetch} [options.fetcher] - Custom fetch implementation
    * @param {Auth} [options.auth] - Authentication configuration
+   * @param {string} [options.authHeaderName] - Custom header name for authentication
    */
   constructor(options: { 
     fetcher?: typeof fetch;
@@ -41,12 +46,28 @@ export class DefaultHttpClient implements HttpClient {
   }
 
   /**
+   * Get current state
+   */
+  getState() {
+    return this.state;
+  }
+
+  /**
+   * Update state
+   */
+  setState(newState: Partial<typeof this.state>) {
+    this.state = { ...this.state, ...newState };
+  }
+
+  /**
    * Set authentication configuration
    * 
    * @param {Auth} auth - Authentication configuration
    */
   setAuth(auth: Auth | null): void {
     this.auth = auth;
+    // Update authenticated state
+    this.setState({ isAuthenticated: !!auth });
   }
 
   /**

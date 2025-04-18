@@ -323,3 +323,19 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   requiresAuth?: boolean;
 }
+
+/**
+ * SDK Event Map
+ */
+export interface SDKEventMap {
+  beforeRequest: (url: string, options: HttpRequestOptions) => void;
+  afterRequest: <T>(response: HttpResponse<T>) => void;
+  requestError: (error: CoCartError) => void;
+  cartKeyUpdated: (data: { 
+    cartKey: string; 
+    expiring?: number; 
+    expiration?: number;
+  }) => void;
+  cartTransferred: (cartKey: string) => void;
+  authChanged: (isAuthenticated: boolean) => void;
+}
