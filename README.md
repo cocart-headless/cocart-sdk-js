@@ -74,7 +74,7 @@ const cocart = new CoCart({
   siteUrl: 'https://example.com',
   // Optional configurations
   apiVersion: 'v2',
-  apiPrefix: 'wp-json/cocart',
+  apiPrefix: 'wp-json', // Use this only if you have changed the REST API prefix on your WordPress setup.
   timeout: 30000,
 });
 

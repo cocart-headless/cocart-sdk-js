@@ -116,8 +116,8 @@ export class CoCart {
    * Get the base URL for API requests
    */
   public getBaseUrl(): string {
-    const { siteUrl, apiPrefix, apiVersion } = this.config;
-    let baseUrl = `${siteUrl}/${apiPrefix}/${apiVersion}`;
+    const { siteUrl, apiPrefix, apiNamespace, apiVersion } = this.config;
+    let baseUrl = `${siteUrl}/${apiPrefix}/${apiNamespace}/${apiVersion}`;
 
     // Remove trailing slashes
     baseUrl = baseUrl.replace(/\/+$/, '');

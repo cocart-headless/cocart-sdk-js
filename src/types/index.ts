@@ -71,8 +71,11 @@ export interface CoCartConfig {
   /** API version to use, defaults to 'v2' */
   apiVersion?: string;
 
-  /** API prefix, defaults to 'wp-json/cocart' */
+  /** API prefix, defaults to 'wp-json' */
   apiPrefix?: string;
+
+  /** API namespace, defaults to 'cocart' */
+  apiNamespace?: string;
 
   /** HTTP port, defaults to undefined (standard ports) */
   port?: number;
@@ -131,7 +134,8 @@ export interface CurrencyInfo {
  */
 export const DEFAULT_CONFIG: Partial<CoCartConfig> = {
   apiVersion: 'v2',
-  apiPrefix: 'wp-json/cocart',
+  apiPrefix: 'wp-json',
+  apiNamespace: 'cocart',
   timeout: 30000,
   authHeaderName: 'Authorization',
   auth: { type: 'none' },

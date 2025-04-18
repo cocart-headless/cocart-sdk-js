@@ -27,7 +27,8 @@ const responseTransformer: ResponseTransformer<any, any> = (response) => {
 const cocart = new CoCart({
   siteUrl: 'https://example.com',
   apiVersion: 'v2',
-  apiPrefix: 'wp-json/cocart',
+  apiPrefix: 'wp-json',
+  apiNamespace: 'cocart',
   responseTransformer,
 });
 
