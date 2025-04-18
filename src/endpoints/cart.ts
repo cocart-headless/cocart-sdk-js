@@ -17,7 +17,7 @@ import {
   UpdateItemRequest,
   RemoveItemRequest
 } from '../types';
-import { validateProductId, validateQuantity } from '../utils/validation';
+import { validateProductId, validateQuantity, validateEmail, validatePhone } from '../utils/validation';
 
 /**
  * Manages shopping cart operations
@@ -64,6 +64,8 @@ export class CartEndpoint extends BaseEndpoint {
   async addItem(id: number, options?: Omit<AddToCartRequest, 'id'>): Promise<Cart> {
     validateProductId(id);
     validateQuantity(options?.quantity);
+    validateEmail(options?.email);
+    validatePhone(options?.phone);
 
     const data = {
       id,
