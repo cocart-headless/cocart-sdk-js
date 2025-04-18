@@ -126,8 +126,8 @@ const cocart = new CoCart({
   siteUrl: 'https://example.com',
   auth: {
     type: 'basic',
-    username: 'consumer_key',
-    password: 'consumer_secret',
+    username: 'username', // email address, billing phone number and consumer key (for admin)
+    password: 'password', // consumer_secret (for admin)
   },
 });
 ```
