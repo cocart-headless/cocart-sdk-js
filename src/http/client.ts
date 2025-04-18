@@ -12,6 +12,7 @@ import {
 export class DefaultHttpClient implements HttpClient {
   private fetcher: typeof fetch;
   private auth: Auth | null;
+  private authHeaderName: string;
   private onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
   private onAfterRequest?: <T>(response: HttpResponse<T>) => void;
   private onRequestError?: (error: Error) => void;
@@ -26,12 +27,14 @@ export class DefaultHttpClient implements HttpClient {
   constructor(options: { 
     fetcher?: typeof fetch;
     auth?: Auth | null;
+    authHeaderName?: string;
     onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
     onAfterRequest?: <T>(response: HttpResponse<T>) => void;
     onRequestError?: (error: Error) => void;
   } = {}) {
     this.fetcher = options.fetcher || fetch;
     this.auth = options.auth || null;
+    this.authHeaderName = options.authHeaderName || 'Authorization';
     this.onBeforeRequest = options.onBeforeRequest;
     this.onAfterRequest = options.onAfterRequest;
     this.onRequestError = options.onRequestError;
@@ -80,9 +83,9 @@ export class DefaultHttpClient implements HttpClient {
     // Apply authentication based on type
     if (this.auth.type === 'basic') {
       const credentials = btoa(`${this.auth.username}:${this.auth.password}`);
-      newOptions.headers['Authorization'] = `Basic ${credentials}`;
+      newOptions.headers[this.authHeaderName] = `Basic ${credentials}`;
     } else if (this.auth.type === 'jwt') {
-      newOptions.headers['Authorization'] = `Bearer ${this.auth.token}`;
+      newOptions.headers[this.authHeaderName] = `Bearer ${this.auth.token}`;
     }
 
     return newOptions;

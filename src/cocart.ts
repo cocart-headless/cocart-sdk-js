@@ -68,6 +68,7 @@ export class CoCart {
     // Set up HTTP client with event handlers
     this.httpClient = this.config.httpClient || createCustomHttpClient({
       auth: this.config.auth,
+      authHeaderName: this.config.authHeaderName,
       onBeforeRequest: (url, options) => {
         this.emit('beforeRequest', 'api', options);
       },
