@@ -6,6 +6,7 @@ export * from './types';
 export * from './types/utils';
 
 // Export endpoints
+export * from './endpoints/store';
 export * from './endpoints/cart';
 export * from './endpoints/items';
 export * from './endpoints/products';
