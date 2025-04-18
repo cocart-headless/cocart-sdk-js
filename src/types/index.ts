@@ -288,19 +288,21 @@ export interface AddToCartRequest {
   id: number;
   quantity?: number;
   variation?: Record<string, any>;
-  cart_item_data?: Record<string, any>;
-  return_cart?: boolean;
+  item_data?: Record<string, any>;
+  email?: string;
+  phone?: string;
+  return_item?: boolean;
 }
 
 export interface UpdateItemRequest {
-  cart_item_key: string;
+  item_key: string;
   quantity?: number;
-  return_cart?: boolean;
+  return_status?: boolean;
 }
 
 export interface RemoveItemRequest {
-  cart_item_key: string;
-  return_cart?: boolean;
+  item_key: string;
+  return_status?: boolean;
 }
 
 /**
