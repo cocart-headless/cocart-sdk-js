@@ -48,8 +48,8 @@ const clientWithOptions = new CoCart({
   apiVersion: 'v2',
   auth: {
     type: 'basic',
-    username: 'consumer_key',
-    password: 'consumer_secret'
+    username: 'username',
+    password: 'password'
   },
   currency: true,             // Enable automatic currency formatting
   timezoneConversion: true    // Enable timezone conversion

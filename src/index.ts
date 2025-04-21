@@ -10,7 +10,6 @@ export * from './endpoints/store';
 export * from './endpoints/cart';
 export * from './endpoints/items';
 export * from './endpoints/products';
-export * from './endpoints/session';
 
 // Export HTTP client
 export { APIError, DefaultHttpClient, createCustomHttpClient } from './http/client';

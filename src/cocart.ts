@@ -14,6 +14,7 @@ import { EventHandler, EventName, EventMap } from './types/utils';
 
 // Import endpoint handlers
 import { CartEndpoint } from './endpoints/cart';
+import { CustomerEndpoint } from './endpoints/customer';
 
 /**
  * Currency formatter interface
@@ -39,6 +40,7 @@ export class CoCart {
 
   // Endpoints
   public cart: CartEndpoint;
+  public customer: CustomerEndpoint;
   
   // Event handlers
   private eventHandlers: {
@@ -102,6 +104,26 @@ export class CoCart {
           this.setCartKey(args[0] as string);
         }
       }
+    );
+
+    // Initialize customer endpoint
+    this.customer = new CustomerEndpoint(
+      `${baseUrl}`, 
+      this.httpClient,
+      (tokenState) => {
+        // Only update auth if no auth configured
+        if (!this.config.auth && tokenState.token) {
+          this.updateState({
+            isAuthenticated: true,
+            auth: {
+              type: 'jwt',
+              token: tokenState.token
+            },
+            tokenExpiresAt: tokenState.expiresAt
+          });
+        }
+      },
+      config.customer?.validateInterval
     );
   }
 
