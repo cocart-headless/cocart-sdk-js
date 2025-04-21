@@ -9,6 +9,9 @@ Developer-friendly & type-safe Typescript SDK specifically catered to leverage C
 <!-- Start Summary [summary] -->
 ## Summary
 
+> [!WARNING]
+> ⚠️ This SDK is a work in progress and should not be used for production at this time. Please star the repository if interested and keep a lookout for an official release.
+
 CoCart API
 
 Read the docs at https://docs.cocartapi.com/api-reference
