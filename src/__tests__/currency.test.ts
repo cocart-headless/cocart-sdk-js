@@ -4,7 +4,7 @@ import {
   extractCurrencyInfo,
   isCurrencyField,
   processObjectCurrency,
-  createCurrencyTransformer
+  createCurrencyTransformer,
 } from '../utils/currency';
 import { CurrencyInfo } from '../types';
 
@@ -16,7 +16,7 @@ describe('Currency Utilities', () => {
     currency_decimal_separator: '.',
     currency_thousand_separator: ',',
     currency_prefix: '$',
-    currency_suffix: ''
+    currency_suffix: '',
   };
 
   describe('normalizeCurrencyConfig', () => {
@@ -31,7 +31,7 @@ describe('Currency Utilities', () => {
       const config = normalizeCurrencyConfig({
         enabled: true,
         autoFormat: false,
-        currencyFields: ['custom_price']
+        currencyFields: ['custom_price'],
       });
       expect(config.enabled).toBe(true);
       expect(config.autoFormat).toBe(false);
@@ -67,7 +67,7 @@ describe('Currency Utilities', () => {
         currency_code: 'EUR',
         currency_symbol: '€',
         currency_prefix: '',
-        currency_suffix: '€'
+        currency_suffix: '€',
       };
       const result = defaultCurrencyFormatter(42.99, euroCurrency);
       expect(result).toBe('42.99€');
@@ -82,7 +82,7 @@ describe('Currency Utilities', () => {
   describe('extractCurrencyInfo', () => {
     it('should extract currency from top level', () => {
       const response = {
-        currency: mockCurrencyInfo
+        currency: mockCurrencyInfo,
       };
       const result = extractCurrencyInfo(response);
       expect(result).toEqual(mockCurrencyInfo);
@@ -91,8 +91,8 @@ describe('Currency Utilities', () => {
     it('should extract currency from cart', () => {
       const response = {
         cart: {
-          currency: mockCurrencyInfo
-        }
+          currency: mockCurrencyInfo,
+        },
       };
       const result = extractCurrencyInfo(response);
       expect(result).toEqual(mockCurrencyInfo);
@@ -106,7 +106,7 @@ describe('Currency Utilities', () => {
         currency_decimal_separator: '.',
         currency_thousand_separator: ',',
         currency_prefix: '$',
-        currency_suffix: ''
+        currency_suffix: '',
       };
       const result = extractCurrencyInfo(response);
       expect(result).toEqual(mockCurrencyInfo);
@@ -114,7 +114,7 @@ describe('Currency Utilities', () => {
 
     it('should return undefined for missing currency info', () => {
       const response = {
-        some_data: 'value'
+        some_data: 'value',
       };
       const result = extractCurrencyInfo(response);
       expect(result).toBeUndefined();
@@ -147,12 +147,12 @@ describe('Currency Utilities', () => {
         name: 'Product',
         price: 29.99,
         sale_price: 24.99,
-        description: 'A product'
+        description: 'A product',
       };
 
       const config = normalizeCurrencyConfig({
         enabled: true,
-        currencyFields: ['price', 'sale_price']
+        currencyFields: ['price', 'sale_price'],
       });
 
       const processed = processObjectCurrency(obj, config, mockCurrencyInfo);
@@ -169,13 +169,13 @@ describe('Currency Utilities', () => {
         name: 'Product',
         pricing: {
           regular_price: 29.99,
-          sale_price: 24.99
-        }
+          sale_price: 24.99,
+        },
       };
 
       const config = normalizeCurrencyConfig({
         enabled: true,
-        currencyFields: ['regular_price', 'sale_price']
+        currencyFields: ['regular_price', 'sale_price'],
       });
 
       const processed = processObjectCurrency(obj, config, mockCurrencyInfo);
@@ -187,12 +187,12 @@ describe('Currency Utilities', () => {
     it('should handle arrays of objects', () => {
       const arr = [
         { id: 1, price: 29.99 },
-        { id: 2, price: 39.99 }
+        { id: 2, price: 39.99 },
       ];
 
       const config = normalizeCurrencyConfig({
         enabled: true,
-        currencyFields: ['price']
+        currencyFields: ['price'],
       });
 
       const processed = processObjectCurrency(arr, config, mockCurrencyInfo);
@@ -204,13 +204,13 @@ describe('Currency Utilities', () => {
     it('should preserve original values when configured', () => {
       const obj = {
         price: 29.99,
-        total: 59.98
+        total: 59.98,
       };
 
       const config = normalizeCurrencyConfig({
         enabled: true,
         preserveOriginal: true,
-        currencyFields: ['price', 'total']
+        currencyFields: ['price', 'total'],
       });
 
       const processed = processObjectCurrency(obj, config, mockCurrencyInfo);
@@ -223,13 +223,13 @@ describe('Currency Utilities', () => {
 
     it('should use custom formatter function when provided', () => {
       const obj = {
-        price: 29.99
+        price: 29.99,
       };
 
       const config = normalizeCurrencyConfig({
         enabled: true,
         currencyFields: ['price'],
-        formatFunction: (value) => `CUSTOM: ${value}`
+        formatFunction: value => `CUSTOM: ${value}`,
       });
 
       const processed = processObjectCurrency(obj, config, mockCurrencyInfo);
@@ -240,12 +240,12 @@ describe('Currency Utilities', () => {
     it('should not format already formatted fields', () => {
       const obj = {
         price: 29.99,
-        formatted_price: '$29.99'
+        formatted_price: '$29.99',
       };
 
       const config = normalizeCurrencyConfig({
         enabled: true,
-        currencyFields: ['price', 'formatted_price']
+        currencyFields: ['price', 'formatted_price'],
       });
 
       const processed = processObjectCurrency(obj, config, mockCurrencyInfo);
@@ -259,7 +259,7 @@ describe('Currency Utilities', () => {
     it('should create a transformer that formats currency values', () => {
       const config = normalizeCurrencyConfig({
         enabled: true,
-        currencyFields: ['price', 'total']
+        currencyFields: ['price', 'total'],
       });
 
       const transformer = createCurrencyTransformer(config);
@@ -268,11 +268,11 @@ describe('Currency Utilities', () => {
         currency: mockCurrencyInfo,
         products: [
           { id: 1, price: 29.99 },
-          { id: 2, price: 39.99 }
+          { id: 2, price: 39.99 },
         ],
         cart: {
-          total: 69.98
-        }
+          total: 69.98,
+        },
       };
 
       const result = transformer('products', response);
@@ -284,16 +284,14 @@ describe('Currency Utilities', () => {
 
     it('should return unmodified response when disabled', () => {
       const config = normalizeCurrencyConfig({
-        enabled: false
+        enabled: false,
       });
 
       const transformer = createCurrencyTransformer(config);
 
       const response = {
         currency: mockCurrencyInfo,
-        products: [
-          { id: 1, price: 29.99 }
-        ]
+        products: [{ id: 1, price: 29.99 }],
       };
 
       const result = transformer('products', response);
@@ -304,15 +302,13 @@ describe('Currency Utilities', () => {
 
     it('should return unmodified response when no currency info', () => {
       const config = normalizeCurrencyConfig({
-        enabled: true
+        enabled: true,
       });
 
       const transformer = createCurrencyTransformer(config);
 
       const response = {
-        products: [
-          { id: 1, price: 29.99 }
-        ]
+        products: [{ id: 1, price: 29.99 }],
       };
 
       const result = transformer('products', response);
@@ -321,4 +317,4 @@ describe('Currency Utilities', () => {
       expect(result.products[0].price).toBe(29.99);
     });
   });
-}); 
+});

@@ -43,5 +43,5 @@ export {
   createCurrencyTransformer,
   extractCurrencyInfo,
   isCurrencyField,
-  processObjectCurrency
+  processObjectCurrency,
 } from './utils/currency';

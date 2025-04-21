@@ -131,10 +131,7 @@ export class ItemsEndpoint extends BaseEndpoint {
    */
   private isCartResponse(response: any): boolean {
     return (
-      response &&
-      typeof response === 'object' &&
-      'cart_hash' in response &&
-      'items' in response
+      response && typeof response === 'object' && 'cart_hash' in response && 'items' in response
     );
   }
 }

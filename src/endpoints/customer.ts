@@ -1,10 +1,10 @@
 import { HttpClient } from '../types';
-import { 
-  LoginRequest, 
-  LoginResponse, 
-  TokenValidateResponse, 
+import {
+  LoginRequest,
+  LoginResponse,
+  TokenValidateResponse,
   TokenRefreshResponse,
-  TokenState 
+  TokenState,
 } from '../types/auth';
 import { getTokenExpiration } from '../utils/auth';
 
@@ -36,9 +36,9 @@ export class CustomerEndpoint {
         token: response.data.extras.jwt_token,
         refreshToken: response.data.extras.jwt_refresh,
         lastValidated: Date.now(),
-        expiresAt: getTokenExpiration(response.data.extras.jwt_token)
+        expiresAt: getTokenExpiration(response.data.extras.jwt_token),
       };
-      
+
       this.onAuthStateChange(tokenState);
       this.startTokenValidation(tokenState.token);
     }
@@ -56,8 +56,8 @@ export class CustomerEndpoint {
       {},
       {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
@@ -69,19 +69,18 @@ export class CustomerEndpoint {
    */
   async refreshToken(refreshToken: string): Promise<TokenRefreshResponse> {
     const url = this.replaceApiVersion(`${this.baseUrl}`);
-    const response = await this.httpClient.post<TokenRefreshResponse>(
-      `${url}/refresh-token`,
-      { refresh_token: refreshToken }
-    );
+    const response = await this.httpClient.post<TokenRefreshResponse>(`${url}/refresh-token`, {
+      refresh_token: refreshToken,
+    });
 
     if (response.data.token) {
       const tokenState: TokenState = {
         token: response.data.token,
         refreshToken: response.data.refresh_token,
         lastValidated: Date.now(),
-        expiresAt: getTokenExpiration(response.data.token)
+        expiresAt: getTokenExpiration(response.data.token),
       };
-      
+
       this.onAuthStateChange(tokenState);
       this.startTokenValidation(tokenState.token);
     }

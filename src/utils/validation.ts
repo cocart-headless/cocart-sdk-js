@@ -53,7 +53,7 @@ export function validatePhone(phone?: string): void {
 
   // International format: +CountryCode followed by 6-12 digits
   const internationalFormat = /^\+[1-9]\d{6,14}$/;
-  
+
   // Local format: 6-12 digits, may start with optional 0
   const localFormat = /^0?\d{6,12}$/;
 

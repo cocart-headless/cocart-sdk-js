@@ -1,6 +1,6 @@
 /**
  * Base Endpoint Class
- * 
+ *
  * Provides common functionality for all API endpoints including:
  * - Consistent request methods (get, post, put, delete)
  * - Standardized error handling
@@ -34,7 +34,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Creates a new endpoint instance
-   * 
+   *
    * @param {string} basePath - Base path for the endpoint
    * @param {HttpClient} httpClient - HTTP client for making requests
    * @param {Function} emitEvent - Function to emit events
@@ -51,7 +51,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Makes a GET request to the specified path
-   * 
+   *
    * @param {string} path - Path to request
    * @param {RequestOptions} [options] - Request options
    * @returns {Promise<T>} - Response data
@@ -63,7 +63,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Makes a POST request to the specified path
-   * 
+   *
    * @param {string} path - Path to request
    * @param {any} [data] - Request data
    * @param {RequestOptions} [options] - Request options
@@ -76,7 +76,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Makes a PUT request to the specified path
-   * 
+   *
    * @param {string} path - Path to request
    * @param {any} [data] - Request data
    * @param {RequestOptions} [options] - Request options
@@ -89,7 +89,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Makes a DELETE request to the specified path
-   * 
+   *
    * @param {string} path - Path to request
    * @param {RequestOptions} [options] - Request options
    * @returns {Promise<T>} - Response data
@@ -101,7 +101,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Makes a request to the specified path with the given method
-   * 
+   *
    * @param {string} method - HTTP method
    * @param {string} path - Path to request
    * @param {any} [data] - Request data
@@ -116,7 +116,7 @@ export abstract class BaseEndpoint {
     options: RequestOptions = {}
   ): Promise<T> {
     const url = `${this.basePath}/${path}`.replace(/\/+/g, '/').replace(/\/$/, '');
-    
+
     // Prepare request options
     const requestOptions: HttpRequestOptions = {
       ...options,
@@ -134,21 +134,21 @@ export abstract class BaseEndpoint {
 
       // Make request
       const response = await this.httpClient.request<T>(url, requestOptions);
-      
+
       // Process cart headers
       this.processCartHeaders(response.headers);
-      
+
       // Emit afterRequest event
       this.emitEvent('afterRequest', response);
-      
+
       return response.data;
     } catch (error) {
       // Convert and handle errors
       const coCartError = this.handleRequestError(error);
-      
+
       // Emit requestError event
       this.emitEvent('requestError', coCartError);
-      
+
       throw coCartError;
     }
   }
@@ -173,7 +173,7 @@ export abstract class BaseEndpoint {
       this.emitEvent('cartKeyUpdated', {
         cartKey,
         expiring: cartExpiring ? parseInt(cartExpiring, 10) : undefined,
-        expiration: cartExpiration ? parseInt(cartExpiration, 10) : undefined
+        expiration: cartExpiration ? parseInt(cartExpiration, 10) : undefined,
       });
       (this.httpClient as any).setState?.({ cartKey });
     }
@@ -181,7 +181,7 @@ export abstract class BaseEndpoint {
 
   /**
    * Handles request errors and converts them to CoCart errors
-   * 
+   *
    * @param {unknown} error - The error to handle
    * @returns {CoCartError} - The converted error
    */
@@ -190,19 +190,19 @@ export abstract class BaseEndpoint {
     if (error instanceof CoCartError) {
       return error;
     }
-    
+
     // Handle other error types
     if (error instanceof Error) {
       return new NetworkError(error.message, error);
     }
-    
+
     // Handle unknown errors
     return new NetworkError('Unknown error occurred', error);
   }
 
   /**
    * Creates a URL with query parameters
-   * 
+   *
    * @param {string} path - Base path
    * @param {Record<string, any>} [params] - Query parameters
    * @returns {string} - URL with query parameters
@@ -219,12 +219,12 @@ export abstract class BaseEndpoint {
     }
 
     const queryParams = new URLSearchParams();
-    
+
     for (const [key, value] of Object.entries(params)) {
       if (value === undefined || value === null) {
         continue;
       }
-      
+
       if (Array.isArray(value)) {
         // Handle array parameters (e.g., ?fields[]=id&fields[]=name)
         value.forEach(item => {
@@ -234,12 +234,12 @@ export abstract class BaseEndpoint {
         queryParams.append(key, String(value));
       }
     }
-    
+
     const queryString = queryParams.toString();
     if (queryString) {
       return `${path}?${queryString}`;
     }
-    
+
     return path;
   }
 

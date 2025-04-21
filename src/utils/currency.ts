@@ -1,6 +1,6 @@
 /**
  * Currency Utilities for CoCart SDK
- * 
+ *
  * Provides functionality for formatting currency values.
  * Utilizes currency information provided directly from the API.
  */
@@ -27,33 +27,30 @@ const COMMON_CURRENCY_FIELDS = [
   'line_tax',
   'line_subtotal_tax',
   'amount',
-  'cost'
+  'cost',
 ];
 
 /**
  * Format a currency value using the provided currency information
- * 
+ *
  * @param value - Value to format (typically in smallest currency unit)
  * @param currency - Currency configuration from the API
  * @returns Formatted currency string
  */
-export function formatCurrencyValue(
-  value: number | string,
-  currency: CurrencyInfo
-): string {
+export function formatCurrencyValue(value: number | string, currency: CurrencyInfo): string {
   // Convert value to a number if it's a string
   let numericValue = typeof value === 'string' ? parseFloat(value) : value;
-  
+
   // Check if value is a valid number
   if (isNaN(numericValue)) {
     return String(value);
   }
-  
+
   // Always convert from smallest currency unit to decimal value
   // All values from the CoCart API are in the smallest currency unit
   const divisor = Math.pow(10, currency.currency_minor_unit);
   numericValue = numericValue / divisor;
-  
+
   try {
     // Format the number according to currency settings
     const formatted = new Intl.NumberFormat(undefined, {
@@ -61,7 +58,7 @@ export function formatCurrencyValue(
       maximumFractionDigits: currency.currency_minor_unit,
       style: 'decimal', // Don't use 'currency' style to manually control symbol placement
     }).format(numericValue);
-    
+
     // Apply currency symbol based on position
     if (currency.currency_prefix && !currency.currency_suffix) {
       return `${currency.currency_prefix}${formatted}`;
@@ -70,7 +67,7 @@ export function formatCurrencyValue(
     } else if (currency.currency_prefix && currency.currency_suffix) {
       return `${currency.currency_prefix}${formatted}${currency.currency_suffix}`;
     }
-    
+
     // Default to symbol on left if position not specified
     return `${currency.currency_symbol}${formatted}`;
   } catch (error) {
@@ -81,14 +78,14 @@ export function formatCurrencyValue(
 
 /**
  * Creates a currency formatter that uses the API-provided currency information
- * 
+ *
  * @returns A currency formatter object
  */
 export function createCurrencyFormatter() {
   return {
     /**
      * Format a currency amount
-     * 
+     *
      * @param amount - The amount to format (in smallest currency unit)
      * @param currencyInfo - Currency info from the API response
      * @returns Formatted currency string
@@ -98,18 +95,18 @@ export function createCurrencyFormatter() {
       if (typeof amount === 'string') {
         amount = parseFloat(amount);
       }
-      
+
       // If amount is not a valid number, return as is
       if (isNaN(amount)) {
         return String(amount);
       }
-      
+
       return formatCurrencyValue(amount, currencyInfo);
     },
-    
+
     /**
      * Format a decimal value (without currency symbol)
-     * 
+     *
      * @param amount - The amount to format (in smallest currency unit)
      * @param currencyInfo - Currency info from the API response
      * @returns Formatted decimal string without currency symbol
@@ -117,18 +114,18 @@ export function createCurrencyFormatter() {
     formatDecimal: (amount: number | string, currencyInfo: CurrencyInfo): string => {
       // Convert to number if string
       const numericValue = typeof amount === 'string' ? parseFloat(amount) : amount;
-      
+
       // Check if value is a valid number
       if (isNaN(numericValue)) {
         return String(amount);
       }
-      
-      // Convert from smallest unit 
+
+      // Convert from smallest unit
       const divisor = Math.pow(10, currencyInfo.currency_minor_unit);
       const valueToFormat = numericValue / divisor;
-      
+
       return valueToFormat.toFixed(currencyInfo.currency_minor_unit);
-    }
+    },
   };
 }
 
@@ -142,7 +139,7 @@ const DEFAULT_CURRENCY_CONFIG: CurrencyFormatterConfig = {
   _decimalSeparator: '.',
   _thousandSeparator: ',',
   _priceFormat: '%s%v',
-  _currencyCode: 'USD'
+  _currencyCode: 'USD',
 };
 
 /**
@@ -152,7 +149,7 @@ const DEFAULT_CURRENCY_CONFIG: CurrencyFormatterConfig = {
  */
 export function extractCurrencyInfo(response: any): CurrencyInfo | undefined {
   if (!response) return undefined;
-  
+
   // Try to find currency information in different possible locations
   if (response.currency) {
     return response.currency;
@@ -163,18 +160,18 @@ export function extractCurrencyInfo(response: any): CurrencyInfo | undefined {
   } else if (response.store_info && response.store_info.currency) {
     return response.store_info.currency;
   }
-  
+
   // Look for individual currency fields at the top level
   const requiredFields = [
     'currency_code',
     'currency_symbol',
     'currency_minor_unit',
     'currency_decimal_separator',
-    'currency_thousand_separator'
+    'currency_thousand_separator',
   ];
-  
+
   const hasAllRequiredFields = requiredFields.every(field => field in response);
-  
+
   if (hasAllRequiredFields) {
     return {
       currency_code: response.currency_code,
@@ -183,10 +180,10 @@ export function extractCurrencyInfo(response: any): CurrencyInfo | undefined {
       currency_decimal_separator: response.currency_decimal_separator,
       currency_thousand_separator: response.currency_thousand_separator,
       currency_prefix: response.currency_prefix,
-      currency_suffix: response.currency_suffix
+      currency_suffix: response.currency_suffix,
     };
   }
-  
+
   return undefined;
 }
 
@@ -201,11 +198,11 @@ export function isCurrencyField(fieldName: string, currencyFields: string[]): bo
   if (currencyFields.includes(fieldName)) {
     return true;
   }
-  
+
   // Check if the field name contains a known currency field as a substring
   // This handles cases like 'tax_total' or 'line_subtotal'
-  return currencyFields.some(knownField => 
-    fieldName.endsWith(`_${knownField}`) || fieldName.includes(`${knownField}_`)
+  return currencyFields.some(
+    knownField => fieldName.endsWith(`_${knownField}`) || fieldName.includes(`${knownField}_`)
   );
 }
 
@@ -224,7 +221,7 @@ export function processObjectCurrency(
   if (!obj || typeof obj !== 'object' || !currencyInfo) {
     return obj;
   }
-  
+
   // For arrays, process each item
   if (Array.isArray(obj)) {
     return obj.map(item => {
@@ -234,15 +231,15 @@ export function processObjectCurrency(
       return item;
     });
   }
-  
+
   // Create a copy of the object to avoid mutating the original
   const result = { ...obj };
-  
+
   // Process each field
   for (const field of Object.keys(result)) {
     if (isCurrencyField(field, currencyFields)) {
       const value = result[field];
-      
+
       // Skip non-numeric values or already formatted strings
       if (
         (typeof value !== 'number' && typeof value !== 'string') ||
@@ -250,27 +247,23 @@ export function processObjectCurrency(
       ) {
         continue;
       }
-      
+
       // Skip if the field name indicates it's already formatted
       if (field.includes('formatted_') || field.startsWith('_original_')) {
         continue;
       }
-      
+
       // Always preserve original values
       result[`_original_${field}`] = value;
-      
+
       // Format the currency value
       result[field] = formatCurrencyValue(value, currencyInfo);
     } else if (typeof result[field] === 'object' && result[field] !== null) {
       // Recursively process nested objects
-      result[field] = processObjectCurrency(
-        result[field],
-        currencyInfo,
-        currencyFields
-      );
+      result[field] = processObjectCurrency(result[field], currencyInfo, currencyFields);
     }
   }
-  
+
   return result;
 }
 
@@ -286,15 +279,15 @@ export function createCurrencyTransformer(
     if (!enabled || !response) {
       return response;
     }
-    
+
     // Extract currency information from the response
     const currencyInfo = extractCurrencyInfo(response);
-    
+
     if (!currencyInfo) {
       return response;
     }
-    
+
     // Process the response to format currency values
     return processObjectCurrency(response, currencyInfo);
   };
-} 
+}

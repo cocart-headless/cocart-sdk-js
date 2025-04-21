@@ -25,7 +25,7 @@ interface Store {
 export class StoreEndpoint extends BaseEndpoint {
   /**
    * Get the store details
-   * 
+   *
    * @returns {Promise<Store>} Store data
    */
   async getStore(): Promise<Store> {

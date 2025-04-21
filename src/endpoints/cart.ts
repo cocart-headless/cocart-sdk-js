@@ -1,6 +1,6 @@
 /**
  * Cart Endpoint
- * 
+ *
  * Handles operations related to the shopping cart including:
  * - Retrieving cart data
  * - Adding, updating, and removing items
@@ -10,14 +10,13 @@
 
 import { BaseEndpoint, RequestOptions } from './base-endpoint';
 import { CartValidationError } from '../http/errors';
+import { Cart, CartItem, AddToCartRequest, UpdateItemRequest, RemoveItemRequest } from '../types';
 import {
-  Cart,
-  CartItem,
-  AddToCartRequest,
-  UpdateItemRequest,
-  RemoveItemRequest
-} from '../types';
-import { validateProductId, validateQuantity, validateEmail, validatePhone } from '../utils/validation';
+  validateProductId,
+  validateQuantity,
+  validateEmail,
+  validatePhone,
+} from '../utils/validation';
 
 /**
  * Manages shopping cart operations
@@ -25,16 +24,16 @@ import { validateProductId, validateQuantity, validateEmail, validatePhone } fro
 export class CartEndpoint extends BaseEndpoint {
   /**
    * Get the current cart
-   * 
+   *
    * @returns {Promise<Cart>} Cart data
    */
   async getCart(): Promise<Cart> {
     return this.request<Cart>('GET', 'cart');
   }
-  
+
   /**
    * Get the cart with only the specified fields
-   * 
+   *
    * @param {K[]} fields - Fields to include in the response
    * @returns {Promise<Pick<Cart, K>>} Filtered cart data
    * @template K - Keys of the Cart type
@@ -46,7 +45,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Clear the entire cart
-   * 
+   *
    * @param {RequestOptions} [options] - Request options
    * @returns {Promise<Cart>} Updated cart
    */
@@ -56,7 +55,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Add an item to the cart
-   * 
+   *
    * @param {number} id - Product ID
    * @param {AddToCartRequest} [options] - Item options
    * @returns {Promise<Cart>} Updated cart
@@ -69,7 +68,7 @@ export class CartEndpoint extends BaseEndpoint {
 
     const data = {
       id,
-      ...options
+      ...options,
     };
 
     return this.request<Cart>('POST', 'cart/add-item', data);
@@ -77,7 +76,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Update a cart item
-   * 
+   *
    * @param {string} cartItemKey - Cart item key
    * @param {UpdateItemRequest} options - Update options
    * @returns {Promise<Cart>} Updated cart
@@ -88,7 +87,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Remove an item from the cart
-   * 
+   *
    * @param {string} cartItemKey - Cart item key
    * @param {RemoveItemRequest} [options] - Remove options
    * @returns {Promise<Cart>} Updated cart
@@ -97,13 +96,13 @@ export class CartEndpoint extends BaseEndpoint {
     // For the DELETE request, include any RemoveItemRequest options as query parameters
     const queryParams = options ? options : {};
     const path = this.createUrl(`cart/item/${cartItemKey}`, queryParams);
-    
+
     return this.request<Cart>('DELETE', path);
   }
 
   /**
    * Get a specific cart item by key
-   * 
+   *
    * @param {string} cartItemKey - Cart item key
    * @returns {Promise<CartItem>} Cart item
    */
@@ -113,7 +112,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Apply a coupon to the cart
-   * 
+   *
    * @param {string} code - Coupon code
    * @returns {Promise<Cart>} Updated cart
    */
@@ -123,7 +122,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Remove a coupon from the cart
-   * 
+   *
    * @param {string} code - Coupon code
    * @returns {Promise<Cart>} Updated cart
    */
@@ -133,17 +132,19 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Create a new cart
-   * 
+   *
    * @returns {Promise<Cart>} New cart
    * @throws {CartValidationError} If cart key already exists
    */
   async create(): Promise<Cart> {
     // Get current cart key from state
     const currentCartKey = this.getCartKeyFromState();
-    
+
     // Prevent creating new cart if one already exists
     if (currentCartKey) {
-      throw new CartValidationError('Cannot create new cart: Cart already exists. Clear the existing cart first.');
+      throw new CartValidationError(
+        'Cannot create new cart: Cart already exists. Clear the existing cart first.'
+      );
     }
 
     return this.request<Cart>('POST', 'cart');
@@ -151,7 +152,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Calculate cart totals
-   * 
+   *
    * @returns {Promise<Cart>} Updated cart with calculated totals
    */
   async calculate(): Promise<Cart> {
@@ -160,7 +161,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Get a count of items in the cart
-   * 
+   *
    * @returns {Promise<{ count: number }>} Item count
    */
   async count(): Promise<{ count: number }> {
@@ -169,7 +170,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Get applied coupons
-   * 
+   *
    * @returns {Promise<any[]>} Array of applied coupons
    */
   async getCoupons(): Promise<any[]> {
@@ -178,7 +179,7 @@ export class CartEndpoint extends BaseEndpoint {
 
   /**
    * Update customer information
-   * 
+   *
    * @param {Object} customerData - Customer data to update
    * @param {Record<string, any>} [customerData.billing_address] - Billing address data
    * @param {Record<string, any>} [customerData.shipping_address] - Shipping address data

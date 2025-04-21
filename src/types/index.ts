@@ -94,13 +94,13 @@ export interface CoCartConfig {
 
   /** Optional transformer function for API responses */
   responseTransformer?: <T = any, R = any>(response: T) => R;
-  
-  /** 
+
+  /**
    * Timezone conversion options - if true, uses browser timezone
    * If an object, uses those specific options
    */
   timezoneConversion?: boolean | TimezoneConversionOptions;
-  
+
   /**
    * Whether to automatically format currency values in API responses.
    * When enabled, integer values are converted to formatted strings
@@ -219,7 +219,7 @@ export interface CartItem {
   cart_item_data: any[];
   featured_image: string;
   item_data: any[];
-  
+
   // Allow any additional properties returned by the API
   [key: string]: any;
 }
@@ -333,11 +333,7 @@ export interface SDKEventMap {
   beforeRequest: (url: string, options: HttpRequestOptions) => void;
   afterRequest: <T>(response: HttpResponse<T>) => void;
   requestError: (error: CoCartError) => void;
-  cartKeyUpdated: (data: { 
-    cartKey: string; 
-    expiring?: number; 
-    expiration?: number;
-  }) => void;
+  cartKeyUpdated: (data: { cartKey: string; expiring?: number; expiration?: number }) => void;
   cartTransferred: (cartKey: string) => void;
   authChanged: (isAuthenticated: boolean) => void;
 }

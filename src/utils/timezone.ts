@@ -1,6 +1,6 @@
 /**
  * Timezone Utilities for CoCart SDK
- * 
+ *
  * Provides functionality for handling, detecting, and converting dates between timezones.
  */
 
@@ -46,7 +46,7 @@ const COMMON_DATE_FIELDS = [
   'next_payment_date',
   'trial_end_date',
   'end_date',
-  'expiry_date'
+  'expiry_date',
 ];
 
 /**
@@ -75,7 +75,7 @@ export function normalizeTimezoneConfig(
     targetTimezone: getBrowserTimezone(),
     dateFields: COMMON_DATE_FIELDS,
     preserveOriginal: false,
-    datePattern: DEFAULT_DATE_PATTERN
+    datePattern: DEFAULT_DATE_PATTERN,
   };
 
   // If options is a boolean, use it for the enabled property
@@ -100,14 +100,14 @@ export function normalizeTimezoneConfig(
  */
 export function isDateString(str: string, pattern = DEFAULT_DATE_PATTERN): boolean {
   if (typeof str !== 'string') return false;
-  
+
   // Check if string matches the pattern
   if (pattern.test(str)) {
     // Additional validation: ensure it parses to a valid date
     const date = new Date(str);
     return !isNaN(date.getTime());
   }
-  
+
   return false;
 }
 
@@ -118,19 +118,19 @@ export function isDateString(str: string, pattern = DEFAULT_DATE_PATTERN): boole
  * @returns Array of field names containing dates
  */
 export function detectDateStrings(
-  obj: Record<string, any>, 
+  obj: Record<string, any>,
   datePattern = DEFAULT_DATE_PATTERN
 ): string[] {
   if (!obj || typeof obj !== 'object') return [];
-  
+
   const dateFields: string[] = [];
-  
+
   for (const key in obj) {
     if (typeof obj[key] === 'string' && isDateString(obj[key], datePattern)) {
       dateFields.push(key);
     }
   }
-  
+
   return dateFields;
 }
 
@@ -149,7 +149,7 @@ export function convertDateTimezone(
   try {
     // Parse the input date
     const date = new Date(dateStr);
-    
+
     // Format the date in the source timezone to get components
     const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone: sourceTimezone,
@@ -159,26 +159,26 @@ export function convertDateTimezone(
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-      hour12: false
+      hour12: false,
     });
-    
+
     // Get parts from the formatter
     const parts = formatter.formatToParts(date);
     const dateParts: Record<string, string> = {};
-    
+
     // Convert the parts array to an object
     parts.forEach(part => {
       if (part.type !== 'literal') {
         dateParts[part.type] = part.value;
       }
     });
-    
+
     // Create a new date with the components in the source timezone
     const sourceDate = new Date(
       `${dateParts.year}-${dateParts.month}-${dateParts.day}T` +
-      `${dateParts.hour}:${dateParts.minute}:${dateParts.second}`
+        `${dateParts.hour}:${dateParts.minute}:${dateParts.second}`
     );
-    
+
     // Format the source date in the target timezone
     return formatDateTime(sourceDate, targetTimezone);
   } catch (error) {
@@ -211,26 +211,28 @@ export function formatDateTime(
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
       });
-      
+
       const parts = isoFormatter.formatToParts(date);
       const dateParts: Record<string, string> = {};
-      
+
       parts.forEach(part => {
         if (part.type !== 'literal') {
           dateParts[part.type] = part.value;
         }
       });
-      
-      return `${dateParts.year}-${dateParts.month}-${dateParts.day}T` +
-             `${dateParts.hour}:${dateParts.minute}:${dateParts.second}`;
+
+      return (
+        `${dateParts.year}-${dateParts.month}-${dateParts.day}T` +
+        `${dateParts.hour}:${dateParts.minute}:${dateParts.second}`
+      );
     }
-    
+
     // Use custom format
     return new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
-      ...options
+      ...options,
     }).format(date);
   } catch (error) {
     console.error('Date formatting error:', error);
@@ -251,14 +253,14 @@ export function processObjectDates(
   storeTimezone?: string
 ): Record<string, any> {
   if (!obj || typeof obj !== 'object') return obj;
-  
+
   // Use provided store timezone or fallback to config
   const sourceTimezone = storeTimezone || config.storeTimezone || 'UTC';
   const targetTimezone = config.targetTimezone || getBrowserTimezone();
-  
+
   // If they're the same, no conversion needed
   if (sourceTimezone === targetTimezone) return obj;
-  
+
   // For arrays, process each item
   if (Array.isArray(obj)) {
     return obj.map(item => {
@@ -268,18 +270,18 @@ export function processObjectDates(
       return item;
     });
   }
-  
+
   // Create a copy of the object to avoid mutating the original
   const result = { ...obj };
-  
+
   // Get fields to process
   let dateFields = config.dateFields || [];
-  
+
   // If no fields specified, auto-detect
   if (dateFields.length === 0) {
     dateFields = detectDateStrings(obj, config.datePattern);
   }
-  
+
   // Process each field
   for (const field of dateFields) {
     if (field in result && typeof result[field] === 'string') {
@@ -289,14 +291,10 @@ export function processObjectDates(
         if (config.preserveOriginal) {
           result[`_original_${field}`] = result[field];
         }
-        
+
         // Convert the date
-        const convertedDate = convertDateTimezone(
-          result[field],
-          sourceTimezone,
-          targetTimezone
-        );
-        
+        const convertedDate = convertDateTimezone(result[field], sourceTimezone, targetTimezone);
+
         // Apply custom formatter if provided
         if (config.dateTimeFormatter && convertedDate !== result[field]) {
           const date = new Date(convertedDate);
@@ -310,14 +308,14 @@ export function processObjectDates(
       result[field] = processObjectDates(result[field], config, storeTimezone);
     }
   }
-  
+
   // Process any other nested objects
   for (const key in result) {
     if (typeof result[key] === 'object' && result[key] !== null) {
       result[key] = processObjectDates(result[key], config, storeTimezone);
     }
   }
-  
+
   return result;
 }
 
@@ -331,17 +329,17 @@ export function createTimezoneTransformer(
 ): (endpoint: string, response: any) => any {
   return (endpoint: string, response: any) => {
     if (!config.enabled || !response) return response;
-    
+
     // Try to extract store timezone from response metadata if present
     let storeTimezone = config.storeTimezone;
-    
+
     if (response.store_info && response.store_info.timezone) {
       storeTimezone = response.store_info.timezone;
     } else if (response.meta && response.meta.timezone) {
       storeTimezone = response.meta.timezone;
     }
-    
+
     // Process the response object to convert dates
     return processObjectDates(response, config, storeTimezone);
   };
-} 
+}

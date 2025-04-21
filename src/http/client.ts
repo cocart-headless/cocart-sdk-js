@@ -1,10 +1,5 @@
 import { HttpClient, HttpRequestOptions, HttpResponse, Auth } from '../types';
-import { 
-  APIError, 
-  NetworkError, 
-  TimeoutError, 
-  createErrorFromResponse 
-} from './errors';
+import { APIError, NetworkError, TimeoutError, createErrorFromResponse } from './errors';
 
 /**
  * Default HTTP client implementation using the native Fetch API
@@ -23,20 +18,22 @@ export class DefaultHttpClient implements HttpClient {
 
   /**
    * Create a new HTTP client
-   * 
+   *
    * @param {Object} options - Client configuration options
    * @param {typeof fetch} [options.fetcher] - Custom fetch implementation
    * @param {Auth} [options.auth] - Authentication configuration
    * @param {string} [options.authHeaderName] - Custom header name for authentication
    */
-  constructor(options: { 
-    fetcher?: typeof fetch;
-    auth?: Auth | null;
-    authHeaderName?: string;
-    onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
-    onAfterRequest?: <T>(response: HttpResponse<T>) => void;
-    onRequestError?: (error: Error) => void;
-  } = {}) {
+  constructor(
+    options: {
+      fetcher?: typeof fetch;
+      auth?: Auth | null;
+      authHeaderName?: string;
+      onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+      onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+      onRequestError?: (error: Error) => void;
+    } = {}
+  ) {
     this.fetcher = options.fetcher || fetch;
     this.auth = options.auth || null;
     this.authHeaderName = options.authHeaderName || 'Authorization';
@@ -61,7 +58,7 @@ export class DefaultHttpClient implements HttpClient {
 
   /**
    * Set authentication configuration
-   * 
+   *
    * @param {Auth} auth - Authentication configuration
    */
   setAuth(auth: Auth | null): void {
@@ -72,7 +69,7 @@ export class DefaultHttpClient implements HttpClient {
 
   /**
    * Set event handlers
-   * 
+   *
    * @param {Object} handlers - Event handlers
    */
   setEventHandlers(handlers: {
@@ -87,13 +84,13 @@ export class DefaultHttpClient implements HttpClient {
 
   /**
    * Add authentication headers to request options
-   * 
+   *
    * @param {HttpRequestOptions} options - HTTP request options
    * @returns {HttpRequestOptions} - Options with auth headers
    */
   private applyAuth(options: HttpRequestOptions): HttpRequestOptions {
     const newOptions = { ...options };
-    
+
     if (!this.auth) {
       return newOptions;
     }
@@ -114,7 +111,7 @@ export class DefaultHttpClient implements HttpClient {
 
   /**
    * Make an HTTP request to the specified URL
-   * 
+   *
    * @param {string} url - The URL to request
    * @param {HttpRequestOptions} [options] - Request options
    * @returns {Promise<HttpResponse<T>>} - Response object
@@ -123,7 +120,7 @@ export class DefaultHttpClient implements HttpClient {
   async request<T = any>(url: string, options: HttpRequestOptions = {}): Promise<HttpResponse<T>> {
     // Apply authentication
     const authOptions = this.applyAuth(options);
-    
+
     // Setup abort controller for timeout
     const controller = new AbortController();
     const { signal } = controller;
@@ -184,11 +181,11 @@ export class DefaultHttpClient implements HttpClient {
       // Handle error responses
       if (!response.ok) {
         const error = createErrorFromResponse(response, data);
-        
+
         if (this.onRequestError) {
           this.onRequestError(error);
         }
-        
+
         throw error;
       }
 
@@ -217,15 +214,12 @@ export class DefaultHttpClient implements HttpClient {
 
       // Handle abort errors (timeouts)
       if (error instanceof DOMException && error.name === 'AbortError') {
-        const timeoutError = new TimeoutError(
-          'Request timed out', 
-          authOptions.timeout || 0
-        );
-        
+        const timeoutError = new TimeoutError('Request timed out', authOptions.timeout || 0);
+
         if (this.onRequestError) {
           this.onRequestError(timeoutError);
         }
-        
+
         throw timeoutError;
       }
 
@@ -234,11 +228,11 @@ export class DefaultHttpClient implements HttpClient {
         error instanceof Error ? error.message : 'Unknown error occurred',
         error
       );
-      
+
       if (this.onRequestError) {
         this.onRequestError(networkError);
       }
-      
+
       throw networkError;
     }
   }
@@ -246,16 +240,18 @@ export class DefaultHttpClient implements HttpClient {
 
 /**
  * Create a custom HTTP client
- * 
+ *
  * @param {Object} options - Client configuration options
  * @returns {HttpClient} - Configured HTTP client
  */
-export function createCustomHttpClient(options: { 
-  fetcher?: typeof fetch;
-  auth?: Auth | null;
-  onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
-  onAfterRequest?: <T>(response: HttpResponse<T>) => void;
-  onRequestError?: (error: Error) => void;
-} = {}): HttpClient {
+export function createCustomHttpClient(
+  options: {
+    fetcher?: typeof fetch;
+    auth?: Auth | null;
+    onBeforeRequest?: (url: string, options: HttpRequestOptions) => void;
+    onAfterRequest?: <T>(response: HttpResponse<T>) => void;
+    onRequestError?: (error: Error) => void;
+  } = {}
+): HttpClient {
   return new DefaultHttpClient(options);
 }

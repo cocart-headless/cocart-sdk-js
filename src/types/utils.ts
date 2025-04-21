@@ -64,4 +64,4 @@ export interface EventMap {
 /**
  * Type for the event name (keys of EventMap)
  */
-export type EventName = keyof EventMap; 
+export type EventName = keyof EventMap;
