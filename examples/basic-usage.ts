@@ -26,7 +26,7 @@ async function runExample() {
     const addResult = await cocart.items.add({
       id: 123, // Product ID
       quantity: 2,
-      return_cart: true, // Return the whole cart after adding
+      return_item: true, // Return just the item after adding
     });
     console.log('Item added to cart');
 
@@ -40,7 +40,7 @@ async function runExample() {
     const calculatedCart = await cocart.cart.calculate();
     console.log(`Cart total: ${calculatedCart.totals.total}`);
 
-    // List products (requires authentication)
+    // List products
     console.log('\nListing products...');
     try {
       const products = await cocart.products.getAll({ per_page: 5 });
@@ -49,7 +49,7 @@ async function runExample() {
         console.log(`- ${product.name} (${product.price})`);
       });
     } catch (error) {
-      console.error('Error listing products (may require authentication):', error);
+      console.error('Error listing products:', error);
     }
 
     // Clear the cart
