@@ -1,0 +1,177 @@
+[
+    {
+        "name": "area: types",
+        "color": "1a123d",
+        "aliases": [],
+        "description": "Issues related to TypeScript types and type definitions"
+    },
+    {
+        "name": "area: documentation",
+        "color": "0b2338",
+        "aliases": [],
+        "description": "Documentation and examples related issues"
+    },
+    {
+        "name": "area: bundling",
+        "color": "1a123d",
+        "aliases": [],
+        "description": "Issues related to build/bundle configuration"
+    },
+    {
+        "name": "area: testing",
+        "color": "1a123d",
+        "aliases": [],
+        "description": "Issues related to unit tests or test infrastructure"
+    },
+    {
+        "name": "focus: api-client",
+        "color": "1a123d",
+        "aliases": [],
+        "description": "Core API client implementation issues"
+    },
+    {
+        "name": "focus: error-handling",
+        "color": "1a123d",
+        "aliases": [],
+        "description": "Error handling and error types"
+    },
+    {
+        "name": "category: breaking-change",
+        "color": "9d8403",
+        "aliases": [],
+        "description": "Changes that break backward compatibility"
+    },
+    {
+        "name": "category: dependencies",
+        "color": "9d8403",
+        "aliases": [],
+        "description": "Dependencies related issues"
+    },
+    {
+        "name": "category: performance",
+        "color": "9d8403",
+        "aliases": [],
+        "description": "Performance related issues"
+    },
+    {
+        "name": "good first issue",
+        "color": "7057ff",
+        "aliases": [],
+        "description": "Good for first-time contributors"
+    },
+    {
+        "name": "needs: author feedback",
+        "color": "393813",
+        "aliases": [],
+        "description": "The issue/PR needs a response from any of the parties involved in the issue."
+    },
+    {
+        "name": "needs: tests",
+        "color": "393813",
+        "aliases": [],
+        "description": "Requires test coverage"
+    },
+    {
+        "name": "needs: discussion",
+        "color": "393813",
+        "aliases": [],
+        "description": "Needs further discussion"
+    },
+    {
+        "name": "needs: developer feedback",
+        "color": "393813",
+        "aliases": [],
+        "description": "Issues that need feedback from one of the CoCart Core developers."
+    },
+    {
+        "name": "needs: votes",
+        "color": "393813",
+        "aliases": [],
+        "description": "Issues that need community votes or feedback to determine priority/direction"
+    },
+    {
+        "name": "pr: major",
+        "color": "990F3D",
+        "aliases": [],
+        "description": "Major version bump"
+    },
+    {
+        "name": "pr: minor",
+        "color": "990F3D",
+        "aliases": [],
+        "description": "Minor version bump"
+    },
+    {
+        "name": "pr: patch",
+        "color": "990F3D",
+        "aliases": [],
+        "description": "Patch version bump"
+    },
+    {
+        "name": "priority: critical",
+        "color": "321820",
+        "aliases": [],
+        "description": "Critical priority issue"
+    },
+    {
+        "name": "priority: high",
+        "color": "321915",
+        "aliases": [],
+        "description": "High priority issue"
+    },
+    {
+        "name": "priority: low",
+        "color": "343b2c",
+        "aliases": [],
+        "description": "Low priority issue"
+    },
+    {
+        "name": "status: awaiting triage",
+        "color": "14252d",
+        "aliases": [],
+        "description": "This is a newly created issue waiting for triage."
+    },
+    {
+        "name": "status: stale",
+        "color": "14252d",
+        "aliases": [
+            "state:unsupported",
+            "scale:large",
+            "scale:medium",
+            "scale:tiny"
+        ],
+        "description": "Issues that have not had any activity for some time."
+    },
+    {
+        "name": "type: bug",
+        "color": "321820",
+        "aliases": [],
+        "description": "Something isn't working"
+    },
+    {
+        "name": "type: community contribution",
+        "color": "0b2338",
+        "aliases": [],
+        "description": "The issue/PR is community contribution."
+    },
+    {
+        "name": "type: enhancement",
+        "color": "0b2338",
+        "aliases": [
+            "enhancement"
+        ],
+        "description": "The issue is a request for an enhancement."
+    },
+    {
+        "name": "type: feature",
+        "color": "0b2338",
+        "aliases": [],
+        "description": "New feature request"
+    },
+    {
+        "name": "type: support request",
+        "color": "E0719E",
+        "aliases": [],
+        "description": "Issues marked as a support request. These issues are closed automatically once tagged."
+    }
+]
