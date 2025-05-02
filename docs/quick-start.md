@@ -24,10 +24,10 @@ Install the CoCart SDK using npm or yarn:
 
 ```bash
 # Using npm
-npm install @cocart/sdk
+npm install @cocart/core
 
 # Using yarn
-yarn add @cocart/sdk
+yarn add @cocart/core
 ```
 
 ## Basic Configuration
@@ -35,7 +35,7 @@ yarn add @cocart/sdk
 Create a client instance with your store URL:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Create the client with minimal configuration
 const cocart = new CoCart({
@@ -154,7 +154,7 @@ For more advanced error handling, check the [Error Handling](./error-handling.md
 TypeScript provides full type information for all SDK methods:
 
 ```typescript
-import { CoCart, Cart, CartItem } from '@cocart/sdk';
+import { CoCart, Cart, CartItem } from '@cocart/core';
 
 const cocart = new CoCart({
   siteUrl: 'https://example.com'

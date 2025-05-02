@@ -1,6 +1,6 @@
-# Contributing to @cocart/sdk
+# Contributing to @cocart/core
 
-We love your input! We want to make contributing to @cocart/sdk as easy and transparent as possible, whether it's:
+We love your input! We want to make contributing to @cocart/core as easy and transparent as possible, whether it's:
 
 - Reporting a bug
 - Discussing the current state of the code

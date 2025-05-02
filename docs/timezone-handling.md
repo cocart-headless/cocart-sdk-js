@@ -35,7 +35,7 @@ The CoCart SDK provides built-in support for automatic timezone conversion, whic
 Enable timezone conversion when initializing the CoCart client:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Enable automatic timezone conversion using the browser's timezone
 const cocart = new CoCart({
@@ -129,7 +129,7 @@ import {
   convertDateTimezone, 
   detectDateStrings,
   formatDateTime
-} from '@cocart/sdk';
+} from '@cocart/core';
 
 // Convert a specific date string between timezones
 const localDate = convertDateTimezone(

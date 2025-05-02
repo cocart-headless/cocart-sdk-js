@@ -61,7 +61,7 @@ This approach provides all the information needed to correctly format currency v
 The CoCart SDK provides built-in support for currency formatting. You can configure currency handling when initializing the SDK:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 const cocart = new CoCart({
   siteUrl: 'https://example.com',

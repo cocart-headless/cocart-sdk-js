@@ -187,7 +187,7 @@ import {
   CartItem, 
   Product,
   AddToCartRequest 
-} from '@cocart/sdk';
+} from '@cocart/core';
 
 // Use in your code
 function displayCartItem(item: CartItem) {
@@ -201,7 +201,7 @@ function displayCartItem(item: CartItem) {
 You can extend the built-in types to include custom fields:
 
 ```typescript
-import { CartItem } from '@cocart/sdk';
+import { CartItem } from '@cocart/core';
 
 // Extend the CartItem interface with custom fields
 interface CustomCartItem extends CartItem {

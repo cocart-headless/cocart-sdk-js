@@ -96,7 +96,7 @@ extendedItems.forEach(item => {
 The SDK includes utility types to make working with extended types easier:
 
 ```typescript
-import { CartItem, Extend } from '@cocart/sdk';
+import { CartItem, Extend } from '@cocart/core';
 
 // Create a custom type with additional fields
 type CustomCartItem = Extend<CartItem, {
@@ -113,7 +113,7 @@ const customItems = cart.items as CustomCartItem[];
 For more complex transformations, you can use a response transformer when creating the client:
 
 ```typescript
-import { CoCart, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, ResponseTransformer } from '@cocart/core';
 
 // Define a transformer that adds computed fields
 const responseTransformer: ResponseTransformer = (response) => {

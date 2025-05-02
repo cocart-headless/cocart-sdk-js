@@ -1,4 +1,4 @@
-# @cocart/sdk
+# @cocart/core
 
 Developer-friendly & type-safe Typescript SDK specifically catered to leverage CoCart API.
 
@@ -7,6 +7,7 @@ Developer-friendly & type-safe Typescript SDK specifically catered to leverage C
 </a>
 
 <!-- Start Summary [summary] -->
+
 ## Summary
 
 > [!WARNING]
@@ -15,31 +16,37 @@ Developer-friendly & type-safe Typescript SDK specifically catered to leverage C
 CoCart API
 
 Read the docs at https://docs.cocartapi.com/api-reference
+
 <!-- End Summary [summary] -->
 
 <!-- Start SDK Installation [installation] -->
+
 ## SDK Installation
 
 The SDK can be installed with either [npm](https://www.npmjs.com/), [pnpm](https://pnpm.io/), [bun](https://bun.sh/) or [yarn](https://classic.yarnpkg.com/en/) package managers.
 
 ### NPM
+
 ```bash
-npm install @cocart/sdk
+npm install @cocart/core
 ```
 
 ### Yarn
+
 ```bash
-yarn add @cocart/sdk
+yarn add @cocart/core
 ```
 
 ### PNPM
+
 ```bash
-pnpm add @cocart/sdk
+pnpm add @cocart/core
 ```
 
 ### BUN
+
 ```bash
-bun add @cocart/sdk
+bun add @cocart/core
 ```
 
 > [!NOTE]
@@ -62,7 +69,7 @@ For the best experience with this SDK, use the following TypeScript compiler opt
 {
   "compilerOptions": {
     "target": "es2020", // or higher
-    "lib": ["es2020", "dom", "dom.iterable"],
+    "lib": ["es2020", "dom", "dom.iterable"]
   }
 }
 ```
@@ -70,7 +77,7 @@ For the best experience with this SDK, use the following TypeScript compiler opt
 ## Basic Usage
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Initialize client
 const cocart = new CoCart({
@@ -148,6 +155,7 @@ const cocart = new CoCart({
 ```
 
 <!-- Start Custom HTTP Client [http-client] -->
+
 ## Custom HTTP Client
 
 The TypeScript SDK makes API calls using an `HTTPClient` that wraps the native [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API). This client is a thin wrapper around `fetch` and provides the ability to attach hooks around the request lifecycle that can be used to modify the request or handle errors and response.
@@ -157,7 +165,7 @@ The `HTTPClient` constructor takes an optional `fetcher` argument that can be us
 The following example shows how to use the `"beforeRequest"` hook to add a custom header and a timeout to requests and how to use the `"requestError"` hook to log errors:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Create a client with interceptors
 const cocart = new CoCart({
@@ -172,18 +180,18 @@ cocart.interceptors.request.use(config => {
     'X-Custom-Header': 'CustomValue',
     'X-App-Version': '1.0.0',
   };
-  
+
   // Add tracking information to query parameters
   if (config.params) {
     config.params = {
       ...config.params,
-      'tracking_id': 'my-app-session-123',
+      tracking_id: 'my-app-session-123',
     };
   }
-  
+
   // Apply request timeout
   config.timeout = 20000; // 20 seconds timeout
-  
+
   console.log(`Making request to ${config.endpoint}`);
   return config;
 });
@@ -193,34 +201,34 @@ cocart.interceptors.response.use(
   // For successful responses
   response => {
     console.log(`Request to ${response.config.endpoint} succeeded`);
-    
+
     // You can transform the response data if needed
     if (response.data && response.data.items) {
       console.log(`Received ${response.data.items.length} items`);
     }
-    
+
     return response;
   },
   // For errors
   error => {
     console.error(`Request failed: ${error.message}`);
-    
+
     // Log errors to your monitoring service
     if (typeof window !== 'undefined') {
       window.myAnalytics.logError({
         type: 'api_error',
         endpoint: error.config?.endpoint,
         status: error.status,
-        message: error.message
+        message: error.message,
       });
     }
-    
+
     // You could implement retry logic for network errors
     if (error.name === 'NetworkError') {
       // Perhaps retry the request
       return Promise.reject(error); // but for now, just pass it through
     }
-    
+
     // Rethrow the error for the caller to handle
     return Promise.reject(error);
   }
@@ -240,6 +248,7 @@ async function fetchCart() {
 ```
 
 <!-- Start Pagination [pagination] -->
+
 ## Pagination
 
 Some of the endpoints in this SDK support pagination. To use pagination, you make your SDK calls as usual, but the returned response object will also be an async iterable that can be consumed using the [`for await...of`][for-await-of] syntax.
@@ -249,7 +258,7 @@ Some of the endpoints in this SDK support pagination. To use pagination, you mak
 Here's an example of one such pagination call:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 const cocart = new CoCart({
   siteUrl: 'https://example.com',
@@ -261,15 +270,15 @@ async function getAllProducts() {
     const productsResponse = await cocart.products.getAll({
       per_page: 20, // items per page
     });
-    
+
     const allProducts = [];
-    
+
     // Iterate through all pages automatically
     for await (const pageProducts of productsResponse) {
       console.log(`Processing page with ${pageProducts.length} products`);
       allProducts.push(...pageProducts);
     }
-    
+
     console.log(`Retrieved ${allProducts.length} products in total`);
     return allProducts;
   } catch (error) {
@@ -284,22 +293,22 @@ async function getProductsWithManualPagination() {
     let page = 1;
     const allProducts = [];
     let hasMorePages = true;
-    
+
     while (hasMorePages) {
       const productsResponse = await cocart.products.getAll({
         per_page: 20,
         page: page,
       });
-      
+
       allProducts.push(...productsResponse.data);
-      
+
       // Check if we've reached the last page
       hasMorePages = productsResponse.hasNextPage();
       page++;
-      
+
       console.log(`Retrieved page ${page - 1}`);
     }
-    
+
     console.log(`Retrieved ${allProducts.length} products in total`);
     return allProducts;
   } catch (error) {
@@ -314,12 +323,12 @@ async function getProductsWithPaginationInfo() {
     const productsResponse = await cocart.products.getAll({
       per_page: 20,
     });
-    
+
     // Access pagination metadata
     console.log(`Total products: ${productsResponse.pagination.total}`);
     console.log(`Total pages: ${productsResponse.pagination.totalPages}`);
     console.log(`Current page: ${productsResponse.pagination.currentPage}`);
-    
+
     return productsResponse.data;
   } catch (error) {
     console.error('Error fetching products:', error);
