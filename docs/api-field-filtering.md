@@ -59,7 +59,7 @@ The CoCart SDK is designed to handle filtered responses automatically. When you 
 ### Making Filtered Requests
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 const cocart = new CoCart({
   siteUrl: 'https://example.com'

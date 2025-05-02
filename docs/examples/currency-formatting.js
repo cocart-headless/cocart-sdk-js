@@ -6,7 +6,7 @@
  */
 
 // Import the CoCart SDK
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Basic usage - automatic formatting with defaults
 async function basicExample() {
@@ -182,7 +182,7 @@ async function directFormattingExample() {
   const { 
     defaultCurrencyFormatter, 
     extractCurrencyInfo 
-  } = require('@cocart/sdk');
+  } = require('@cocart/core');
   
   // Get currency info from a response
   const cocart = new CoCart({

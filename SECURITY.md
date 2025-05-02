@@ -10,7 +10,7 @@ We currently support the following versions with security updates:
 
 ## Reporting a Vulnerability
 
-We take the security of the @cocart/sdk seriously. If you believe you've found a security vulnerability, please follow these steps:
+We take the security of the @cocart/core seriously. If you believe you've found a security vulnerability, please follow these steps:
 
 1. **Do not disclose the vulnerability publicly** - Please don't create a public GitHub issue.
 2. **Email us directly** - Send details to security@cocartapi.com
@@ -27,4 +27,4 @@ We take the security of the @cocart/sdk seriously. If you believe you've found a
 - We'll keep you updated on the progress of the fix.
 - Once the vulnerability is fixed, we'll publicly acknowledge your responsible disclosure, unless you prefer to remain anonymous.
 
-Thank you for helping to keep @cocart/sdk and our users secure!
+Thank you for helping to keep @cocart/core and our users secure!

@@ -25,7 +25,7 @@ The CoCart SDK provides built-in currency formatting functionality that:
 Currency formatting can be enabled when creating a CoCart client:
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Enable currency formatting with default settings
 const cocart = new CoCart({

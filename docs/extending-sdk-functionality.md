@@ -40,7 +40,7 @@ Response transformers allow you to modify the data returned from API calls befor
 ### Basic Response Transformer
 
 ```typescript
-import { CoCart, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, ResponseTransformer } from '@cocart/core';
 
 // Create a response transformer
 const myTransformer: ResponseTransformer = (endpoint, response) => {
@@ -80,7 +80,7 @@ console.log(`Total: ${cart.formatted_totals.total}`);
 ### Type-Safe Response Transformers
 
 ```typescript
-import { CoCart, Cart, ResponseTransformer } from '@cocart/sdk';
+import { CoCart, Cart, ResponseTransformer } from '@cocart/core';
 
 // Define extended types
 interface EnhancedCart extends Cart {
@@ -131,7 +131,7 @@ You can extend the SDK with custom request handlers for specific endpoints or cu
 ### Custom Endpoint Handler
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Extend the client with custom methods
 class EnhancedCoCartClient extends CoCart {
@@ -195,7 +195,7 @@ The SDK's types are designed to be extensible through TypeScript's interface ext
 ### Extending Base Interfaces
 
 ```typescript
-import { CartItem, Cart } from '@cocart/sdk';
+import { CartItem, Cart } from '@cocart/core';
 
 // Extend the CartItem interface with additional properties
 interface SubscriptionCartItem extends CartItem {
@@ -247,7 +247,7 @@ You can add custom middleware to intercept and modify requests and responses.
 ### Request/Response Interceptors
 
 ```typescript
-import { CoCart } from '@cocart/sdk';
+import { CoCart } from '@cocart/core';
 
 // Create the client
 const cocart = new CoCart({
@@ -313,7 +313,7 @@ You can create plugins that package multiple extensions together for reuse.
 ### Creating a Plugin
 
 ```typescript
-import { CoCart, CoCartPlugin } from '@cocart/sdk';
+import { CoCart, CoCartPlugin } from '@cocart/core';
 
 // Define a plugin interface
 interface AnalyticsPlugin extends CoCartPlugin {
